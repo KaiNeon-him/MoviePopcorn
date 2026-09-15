@@ -7,7 +7,7 @@ export default function LanguageSelector() {
   const { language, setLanguage } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
 
-  const languages: Language[] = ['en', 'es', 'fr', 'de', 'zh', 'ja'];
+  const languages: Language[] = ['en', 'es', 'fr', 'de', 'zh', 'ja', 'hi', 'ar', 'pt', 'ru', 'ko', 'tr', 'it', 'pl', 'nl'];
 
   const handleSelect = (lang: Language) => {
     setLanguage(lang);

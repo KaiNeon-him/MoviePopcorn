@@ -8,6 +8,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import SplashScreen from './components/SplashScreen';
 import AdBlockerDetector from './components/AdBlockerDetector';
+import InstallPrompt from './components/InstallPrompt';
 import HomePage from './pages/HomePage';
 import MoviePage from './pages/MoviePage';
 import TVPage from './pages/TVPage';
@@ -47,6 +48,7 @@ function AppContent() {
       </main>
       {!isAuthPage && <Footer />}
       <AdBlockerDetector />
+      <InstallPrompt />
     </div>
   );
 }

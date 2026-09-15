@@ -1,0 +1,48 @@
+{
+  "name": "MoviePopcorn - Stream Movies & TV Shows",
+  "short_name": "MoviePopcorn",
+  "description": "Your ultimate destination for streaming movies and TV shows. Watch thousands of movies and TV shows in multiple languages.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#e50914",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["entertainment", "video", "movies", "tv shows"],
+  "screenshots": [
+    {
+      "src": "/screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Trending Now",
+      "short_name": "Trending",
+      "description": "View trending movies and TV shows",
+      "url": "/trending",
+      "icons": [{ "src": "/trending-icon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "My Watchlist",
+      "short_name": "Watchlist",
+      "description": "View your watchlist",
+      "url": "/watchlist",
+      "icons": [{ "src": "/watchlist-icon.png", "sizes": "96x96" }]
+    }
+  ]
+}
