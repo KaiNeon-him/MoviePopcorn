@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Menu, X, Bookmark } from 'lucide-react';
+import { Search, Menu, X, Bookmark, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Logo from './Logo';
+import UserMenu from './UserMenu';
+import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -11,6 +13,7 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -89,7 +92,7 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Search & Mobile Menu */}
+          {/* Search, Auth & Mobile Menu */}
           <div className="flex items-center gap-2">
             <AnimatePresence mode="wait">
               {showSearch ? (
@@ -134,6 +137,31 @@ export default function Navbar() {
                 </motion.button>
               )}
             </AnimatePresence>
+
+            {/* Auth section */}
+            {user ? (
+              <UserMenu />
+            ) : (
+              <div className="hidden sm:flex items-center gap-2">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Link
+                    to="/login"
+                    className="px-4 py-2 rounded-full text-sm font-medium text-white/70 hover:text-white hover:bg-white/[0.06] transition-all duration-300"
+                  >
+                    Sign In
+                  </Link>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Link
+                    to="/signup"
+                    className="group relative inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-primary to-primary-dark text-white text-sm font-semibold overflow-hidden shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
+                  >
+                    <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                    <span className="relative z-10">Sign Up</span>
+                  </Link>
+                </motion.div>
+              </div>
+            )}
 
             <motion.button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -181,6 +209,32 @@ export default function Navbar() {
                   </Link>
                 </motion.div>
               ))}
+
+              {/* Mobile auth buttons */}
+              {!user && (
+                <motion.div
+                  className="pt-3 mt-3 border-t border-white/[0.06] space-y-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: navLinks.length * 0.05 }}
+                >
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/[0.04] font-medium text-sm transition-all"
+                  >
+                    <User size={16} strokeWidth={2.25} />
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/signup"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-primary to-primary-dark text-white font-semibold text-sm shadow-lg shadow-primary/20"
+                  >
+                    Create Account
+                  </Link>
+                </motion.div>
+              )}
             </div>
           </motion.div>
         )}

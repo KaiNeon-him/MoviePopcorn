@@ -3,21 +3,15 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Logo from './Logo';
 
-interface SplashScreenProps {
-  onComplete: () => void;
-}
-
-export default function SplashScreen({ onComplete }: SplashScreenProps) {
+export default function SplashScreen() {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setVisible(false);
-      // Wait for exit animation before calling onComplete
-      setTimeout(onComplete, 500);
     }, 2500);
     return () => clearTimeout(timer);
-  }, [onComplete]);
+  }, []);
 
   // Render via portal so it doesn't affect the main component tree / router context
   return createPortal(
