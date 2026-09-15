@@ -4,6 +4,8 @@ import { Search, Menu, X, Bookmark, User, Settings, LogOut } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion';
 import Logo from './Logo';
 import UserMenu from './UserMenu';
+import DiscordButton from './DiscordButton';
+import LanguageSelector from './LanguageSelector';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
@@ -137,6 +139,12 @@ export default function Navbar() {
                 </motion.button>
               )}
             </AnimatePresence>
+
+            {/* Discord & Language */}
+            <div className="hidden lg:flex items-center gap-2">
+              <DiscordButton />
+              <LanguageSelector />
+            </div>
 
             {/* Auth section */}
             {user ? (

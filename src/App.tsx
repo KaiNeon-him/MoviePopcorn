@@ -2,10 +2,12 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { SettingsProvider } from './context/SettingsContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { NotificationProvider } from './components/NotificationToast';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import SplashScreen from './components/SplashScreen';
+import AdBlockerDetector from './components/AdBlockerDetector';
 import HomePage from './pages/HomePage';
 import MoviePage from './pages/MoviePage';
 import TVPage from './pages/TVPage';
@@ -44,6 +46,7 @@ function AppContent() {
         </Routes>
       </main>
       {!isAuthPage && <Footer />}
+      <AdBlockerDetector />
     </div>
   );
 }
@@ -52,19 +55,21 @@ export default function App() {
   return (
     <ThemeProvider>
       <SettingsProvider>
-        <AuthProvider>
-          <NotificationProvider>
-            {/* Splash screen rendered via portal into document.body — completely isolated
-                from the router tree below, so it cannot disrupt the <BrowserRouter> context. */}
-            <SplashScreen />
+        <LanguageProvider>
+          <AuthProvider>
+            <NotificationProvider>
+              {/* Splash screen rendered via portal into document.body — completely isolated
+                  from the router tree below, so it cannot disrupt the <BrowserRouter> context. */}
+              <SplashScreen />
 
-            {/* The entire app lives inside a single stable <BrowserRouter> that never
-                unmounts, ensuring useNavigate/useLocation always have a valid context. */}
-            <BrowserRouter>
-              <AppContent />
-            </BrowserRouter>
-          </NotificationProvider>
-        </AuthProvider>
+              {/* The entire app lives inside a single stable <BrowserRouter> that never
+                  unmounts, ensuring useNavigate/useLocation always have a valid context. */}
+              <BrowserRouter>
+                <AppContent />
+              </BrowserRouter>
+            </NotificationProvider>
+          </AuthProvider>
+        </LanguageProvider>
       </SettingsProvider>
     </ThemeProvider>
   );

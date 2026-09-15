@@ -3,16 +3,18 @@ import { motion } from 'framer-motion';
 import { 
   Moon, Sun, Globe, Bell, Shield, Film, Volume2, 
   Monitor, Smartphone, Wifi, Check, Save, Play, 
-  User, Lock, Download, RotateCcw, Trash2, Clock
+  User, Lock, Download, RotateCcw, Trash2, Clock, SkipForward
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useSettings } from '../context/SettingsContext';
+import { useLanguage, languageNames, Language } from '../context/LanguageContext';
 import { useNotifications } from '../components/NotificationToast';
 
 export default function SettingsPage() {
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
+  const { language, setLanguage } = useLanguage();
   const { 
     settings, 
     updateSettings, 
@@ -145,6 +147,29 @@ export default function SettingsPage() {
                 </motion.button>
               </div>
             </div>
+
+            {/* Language */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Globe size={20} strokeWidth={2} className="text-white/60" />
+                <div>
+                  <p className="text-sm font-medium text-white">Language</p>
+                  <p className="text-xs text-white/40">Choose your preferred language</p>
+                </div>
+              </div>
+              <select
+                value={language}
+                onChange={(e) => {
+                  setLanguage(e.target.value as Language);
+                  success('Language Changed', `Switched to ${languageNames[e.target.value as Language]}`);
+                }}
+                className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-primary/50 transition-all cursor-pointer"
+              >
+                {Object.entries(languageNames).map(([code, name]) => (
+                  <option key={code} value={code}>{name}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </motion.div>
 
@@ -193,6 +218,42 @@ export default function SettingsPage() {
                 onChange={(value) => {
                   updateSettings({ autoplayNext: value });
                   info('Autoplay Next Updated', value ? 'Next episode will autoplay' : 'Next episode will not autoplay');
+                }}
+              />
+            </div>
+
+            {/* Auto Skip Intro */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <SkipForward size={20} strokeWidth={2} className="text-white/60" />
+                <div>
+                  <p className="text-sm font-medium text-white">Auto Skip Intro</p>
+                  <p className="text-xs text-white/40">Automatically skip intro sequences</p>
+                </div>
+              </div>
+              <ToggleSwitch 
+                enabled={settings.autoSkipIntro} 
+                onChange={(value) => {
+                  updateSettings({ autoSkipIntro: value });
+                  info('Auto Skip Intro Updated', value ? 'Intro will be skipped automatically' : 'Intro will not be skipped');
+                }}
+              />
+            </div>
+
+            {/* Auto Skip Outro */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <SkipForward size={20} strokeWidth={2} className="text-white/60" />
+                <div>
+                  <p className="text-sm font-medium text-white">Auto Skip Outro</p>
+                  <p className="text-xs text-white/40">Automatically skip outro sequences</p>
+                </div>
+              </div>
+              <ToggleSwitch 
+                enabled={settings.autoSkipOutro} 
+                onChange={(value) => {
+                  updateSettings({ autoSkipOutro: value });
+                  info('Auto Skip Outro Updated', value ? 'Outro will be skipped automatically' : 'Outro will not be skipped');
                 }}
               />
             </div>
@@ -320,6 +381,24 @@ export default function SettingsPage() {
                 </div>
               </motion.div>
             )}
+
+            {/* Ad Blocker Detection */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Shield size={20} strokeWidth={2} className="text-white/60" />
+                <div>
+                  <p className="text-sm font-medium text-white">Ad Blocker Detection</p>
+                  <p className="text-xs text-white/40">Detect and notify about ad blockers</p>
+                </div>
+              </div>
+              <ToggleSwitch 
+                enabled={settings.adBlocker} 
+                onChange={(value) => {
+                  updateSettings({ adBlocker: value });
+                  info('Ad Blocker Detection Updated', value ? 'Ad blocker detection enabled' : 'Ad blocker detection disabled');
+                }}
+              />
+            </div>
           </div>
         </motion.div>
 

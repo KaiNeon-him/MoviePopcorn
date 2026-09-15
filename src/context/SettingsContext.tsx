@@ -8,12 +8,20 @@ export interface AppSettings {
   stillWatching: boolean;
   inactivityTimeout: number;
   autoPauseCountdown: number;
+  autoSkipIntro: boolean;
+  autoSkipOutro: boolean;
   
   // Audio & Subtitles
   subtitles: boolean;
   subtitleLanguage: string;
   audioLanguage: string;
   volume: number;
+  
+  // Ad Blocker
+  adBlocker: boolean;
+  
+  // Language
+  language: string;
   
   // Notifications
   notifications: {
@@ -52,10 +60,14 @@ const DEFAULT_SETTINGS: AppSettings = {
   stillWatching: true,
   inactivityTimeout: 10,
   autoPauseCountdown: 30,
+  autoSkipIntro: true,
+  autoSkipOutro: true,
   subtitles: false,
   subtitleLanguage: 'en',
   audioLanguage: 'en',
   volume: 100,
+  adBlocker: true,
+  language: 'en',
   notifications: {
     newReleases: true,
     recommendations: true,
