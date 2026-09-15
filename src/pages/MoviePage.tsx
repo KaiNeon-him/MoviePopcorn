@@ -1,12 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, Clock, Calendar, Play, ExternalLink, ArrowLeft, BookmarkPlus, BookmarkCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MovieDetails, CastMember, fetchMovieDetails, fetchMovieCredits, getImageUrl, getVidApiMovieUrl } from '../api/tmdb';
 import { useWatchHistory } from '../hooks/useWatchHistory';
 import { useWatchlist } from '../hooks/useWatchlist';
-import { useStillWatching } from '../hooks/useStillWatching';
-import StillWatchingModal from '../components/StillWatchingModal';
+import VideoPlayer from '../components/VideoPlayer';
 
 export default function MoviePage() {
   const { id } = useParams<{ id: string }>();
@@ -14,27 +13,8 @@ export default function MoviePage() {
   const [cast, setCast] = useState<CastMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [showPlayer, setShowPlayer] = useState(false);
-  const [showStillWatching, setShowStillWatching] = useState(false);
   const { addToHistory } = useWatchHistory();
   const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
-
-  const handleStillWatchingTimeout = useCallback(() => {
-    setShowStillWatching(true);
-  }, []);
-
-  useStillWatching({
-    isPlaying: showPlayer && !showStillWatching,
-    onTimeout: handleStillWatchingTimeout,
-  });
-
-  const handleContinueWatching = () => {
-    setShowStillWatching(false);
-  };
-
-  const handleStopWatching = () => {
-    setShowStillWatching(false);
-    setShowPlayer(false);
-  };
 
   useEffect(() => {
     if (!id) return;
@@ -298,32 +278,16 @@ export default function MoviePage() {
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.4 }}
             >
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/[0.1]">
-                <iframe
-                  src={embedUrl}
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                  allowFullScreen
-                  allow="autoplay; fullscreen; encrypted-media"
-                  className="w-full h-full"
-                  title={movie.title}
-                />
-              </div>
+              <VideoPlayer
+                src={embedUrl}
+                title={movie.title || 'Movie'}
+              />
               <p className="text-white/40 text-xs mt-3 text-center font-medium">
                 Powered by VidAPI • If the player doesn't load, try refreshing
               </p>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Still Watching Modal */}
-        <StillWatchingModal
-          isOpen={showStillWatching}
-          onContinue={handleContinueWatching}
-          onStop={handleStopWatching}
-          title={`Still watching ${movie.title}?`}
-        />
 
         {/* Cast */}
         {cast.length > 0 && (

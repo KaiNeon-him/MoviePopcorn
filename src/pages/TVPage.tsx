@@ -1,12 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, Clock, Calendar, Play, ArrowLeft, ChevronRight, BookmarkPlus, BookmarkCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MovieDetails, CastMember, Episode, fetchTVDetails, fetchTVCredits, fetchSeasonEpisodes, getImageUrl, getVidApiTVUrl } from '../api/tmdb';
 import { useWatchHistory } from '../hooks/useWatchHistory';
 import { useWatchlist } from '../hooks/useWatchlist';
-import { useStillWatching } from '../hooks/useStillWatching';
-import StillWatchingModal from '../components/StillWatchingModal';
+import VideoPlayer from '../components/VideoPlayer';
 
 export default function TVPage() {
   const { id } = useParams<{ id: string }>();
@@ -17,27 +16,8 @@ export default function TVPage() {
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [selectedEpisode, setSelectedEpisode] = useState<Episode | null>(null);
   const [showPlayer, setShowPlayer] = useState(false);
-  const [showStillWatching, setShowStillWatching] = useState(false);
   const { addToHistory } = useWatchHistory();
   const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
-
-  const handleStillWatchingTimeout = useCallback(() => {
-    setShowStillWatching(true);
-  }, []);
-
-  useStillWatching({
-    isPlaying: showPlayer && !showStillWatching,
-    onTimeout: handleStillWatchingTimeout,
-  });
-
-  const handleContinueWatching = () => {
-    setShowStillWatching(false);
-  };
-
-  const handleStopWatching = () => {
-    setShowStillWatching(false);
-    setShowPlayer(false);
-  };
 
   useEffect(() => {
     if (!id) return;
@@ -290,32 +270,16 @@ export default function TVPage() {
                 </span>
                 <span className="text-white font-semibold">{selectedEpisode.name}</span>
               </div>
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/[0.1]">
-                <iframe
-                  src={embedUrl}
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                  allowFullScreen
-                  allow="autoplay; fullscreen; encrypted-media"
-                  className="w-full h-full"
-                  title={`${show.name} S${selectedEpisode.season_number}E${selectedEpisode.episode_number}`}
-                />
-              </div>
+              <VideoPlayer
+                src={embedUrl}
+                title={`${show.name} S${selectedEpisode.season_number}E${selectedEpisode.episode_number}`}
+              />
               <p className="text-white/40 text-xs mt-3 text-center font-medium">
                 Powered by VidAPI • If the player doesn't load, try refreshing
               </p>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Still Watching Modal */}
-        <StillWatchingModal
-          isOpen={showStillWatching}
-          onContinue={handleContinueWatching}
-          onStop={handleStopWatching}
-          title={selectedEpisode ? `Still watching ${show.name}?` : "Are you still watching?"}
-        />
 
         {/* Season & Episode Selector */}
         {show.seasons && show.seasons.length > 0 && (
