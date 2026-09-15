@@ -7,15 +7,18 @@ import Logo from './Logo';
 import UserMenu from './UserMenu';
 import DiscordButton from './DiscordButton';
 import LanguageSelector from './LanguageSelector';
+import SearchSuggestions from './SearchSuggestions';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
@@ -38,6 +41,9 @@ export default function Navbar() {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setDropdownOpen(false);
       }
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -48,6 +54,7 @@ export default function Navbar() {
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setShowSearch(false);
+      setShowSuggestions(false);
       setSearchQuery('');
     }
   };
@@ -178,34 +185,51 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             <AnimatePresence mode="wait">
               {showSearch ? (
-                <motion.form
+                <motion.div
                   key="search-form"
-                  onSubmit={handleSearch}
-                  className="flex items-center"
+                  ref={searchRef}
+                  className="relative"
                   initial={{ opacity: 0, width: 0 }}
                   animate={{ opacity: 1, width: 'auto' }}
                   exit={{ opacity: 0, width: 0 }}
                   transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <div className="relative flex items-center">
-                    <Search size={16} className="absolute left-3 text-white/40 pointer-events-none" strokeWidth={2.25} />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search..."
-                      className="bg-white/[0.06] border border-white/[0.08] rounded-full pl-9 pr-10 py-2 text-sm text-white placeholder-white/40 focus:outline-none focus:border-primary/50 focus:bg-white/[0.08] w-56 sm:w-72 transition-all"
-                      autoFocus
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowSearch(false)}
-                      className="absolute right-1.5 p-1.5 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-all"
-                    >
-                      <X size={14} strokeWidth={2.5} />
-                    </button>
-                  </div>
-                </motion.form>
+                  <form onSubmit={handleSearch} className="flex items-center">
+                    <div className="relative flex items-center">
+                      <Search size={16} className="absolute left-3 text-white/40 pointer-events-none" strokeWidth={2.25} />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => {
+                          setSearchQuery(e.target.value);
+                          setShowSuggestions(true);
+                        }}
+                        onFocus={() => setShowSuggestions(true)}
+                        placeholder="Search movies, TV shows..."
+                        className="bg-white/[0.06] border border-white/[0.08] rounded-full pl-9 pr-10 py-2 text-sm text-white placeholder-white/40 focus:outline-none focus:border-primary/50 focus:bg-white/[0.08] w-56 sm:w-72 transition-all"
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowSearch(false);
+                          setShowSuggestions(false);
+                          setSearchQuery('');
+                        }}
+                        className="absolute right-1.5 p-1.5 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-all"
+                      >
+                        <X size={14} strokeWidth={2.5} />
+                      </button>
+                    </div>
+                  </form>
+                  
+                  {/* Search Suggestions */}
+                  <SearchSuggestions
+                    query={searchQuery}
+                    isOpen={showSuggestions && searchQuery.length >= 2}
+                    onClose={() => setShowSuggestions(false)}
+                  />
+                </motion.div>
               ) : (
                 <motion.button
                   key="search-btn"
