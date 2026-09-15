@@ -81,32 +81,44 @@ export default function Navbar() {
           <div className="hidden md:block relative" ref={dropdownRef}>
             <motion.button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] hover:border-white/[0.15] transition-all duration-300 text-sm font-medium"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${
+                dropdownOpen
+                  ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                  : 'bg-gradient-to-r from-primary/20 to-primary/10 border border-primary/30 text-white hover:bg-primary/30 hover:border-primary/50'
+              }`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
             >
-              <span className="text-white/80">Browse</span>
+              <span className="text-white">Browse</span>
               <motion.div
                 animate={{ rotate: dropdownOpen ? 180 : 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
               >
-                <ChevronDown size={16} strokeWidth={2.5} className="text-white/60" />
+                <ChevronDown size={18} strokeWidth={2.5} className="text-white" />
               </motion.div>
             </motion.button>
 
             <AnimatePresence>
               {dropdownOpen && (
                 <motion.div
-                  className="absolute top-full left-0 mt-2 w-64 bg-dark-lighter/95 backdrop-blur-2xl border border-white/[0.08] rounded-2xl shadow-2xl shadow-black/50 overflow-hidden z-50"
+                  className="absolute top-full left-0 mt-3 w-72 bg-dark-lighter/98 backdrop-blur-2xl border-2 border-primary/30 rounded-2xl shadow-2xl shadow-primary/20 overflow-hidden z-50"
                   initial={{ opacity: 0, y: -10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <div className="p-2">
+                  {/* Arrow pointing up */}
+                  <div className="absolute -top-2 left-6 w-4 h-4 bg-dark-lighter/98 border-l-2 border-t-2 border-primary/30 transform rotate-45" />
+                  
+                  <div className="p-3">
+                    {/* Header */}
+                    <div className="px-3 py-2 mb-2 border-b border-white/[0.06]">
+                      <p className="text-xs font-semibold text-white/40 uppercase tracking-wider">Navigation</p>
+                    </div>
+                    
                     {navLinks.map((link, index) => {
                       const Icon = link.icon;
                       const isActive = location.pathname === link.to;
@@ -120,30 +132,35 @@ export default function Navbar() {
                           <Link
                             to={link.to}
                             onClick={() => setDropdownOpen(false)}
-                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                            className={`group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 ${
                               isActive
-                                ? 'bg-primary/20 border border-primary/30'
-                                : 'hover:bg-white/[0.06]'
+                                ? 'bg-gradient-to-r from-primary/20 to-primary/10 border border-primary/40'
+                                : 'hover:bg-white/[0.08] border border-transparent hover:border-white/[0.1]'
                             }`}
                           >
-                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
-                              isActive
-                                ? 'bg-primary/30'
-                                : 'bg-white/[0.06]'
-                            }`}>
-                              <Icon size={18} strokeWidth={2.25} className={isActive ? 'text-primary' : 'text-white/70'} />
-                            </div>
+                            <motion.div 
+                              className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
+                                isActive
+                                  ? 'bg-primary/40 shadow-lg shadow-primary/20'
+                                  : 'bg-white/[0.08] group-hover:bg-primary/20'
+                              }`}
+                              whileHover={{ scale: 1.1, rotate: 5 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <Icon size={20} strokeWidth={2.25} className={isActive ? 'text-primary' : 'text-white/80 group-hover:text-primary'} />
+                            </motion.div>
                             <div className="flex-1">
-                              <div className={`text-sm font-medium ${isActive ? 'text-primary' : 'text-white'}`}>
+                              <div className={`text-sm font-semibold ${isActive ? 'text-primary' : 'text-white group-hover:text-primary'} transition-colors`}>
                                 {link.label}
                               </div>
-                              <div className="text-xs text-white/40">{link.description}</div>
+                              <div className="text-xs text-white/50 mt-0.5">{link.description}</div>
                             </div>
                             {isActive && (
                               <motion.div
-                                className="w-1.5 h-1.5 rounded-full bg-primary"
+                                className="w-2 h-2 rounded-full bg-primary shadow-lg shadow-primary/50"
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
+                                transition={{ type: "spring", stiffness: 500 }}
                               />
                             )}
                           </Link>
