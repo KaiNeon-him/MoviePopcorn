@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Menu, X, Bookmark, User, Settings, LogOut } from 'lucide-react';
+import { Search, Menu, X, Bookmark, User, Settings, LogOut, Home, Film, Tv, TrendingUp, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Logo from './Logo';
 import UserMenu from './UserMenu';
@@ -13,6 +13,8 @@ export default function Navbar() {
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
@@ -27,7 +29,18 @@ export default function Navbar() {
 
   useEffect(() => {
     setMobileMenuOpen(false);
+    setDropdownOpen(false);
   }, [location]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,11 +52,11 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { to: '/', label: 'Home' },
-    { to: '/movies', label: 'Movies' },
-    { to: '/tv', label: 'TV Shows' },
-    { to: '/trending', label: 'Trending' },
-    { to: '/watchlist', label: 'Watchlist' },
+    { to: '/', label: 'Home', icon: Home, description: 'Discover new content' },
+    { to: '/movies', label: 'Movies', icon: Film, description: 'Browse all movies' },
+    { to: '/tv', label: 'TV Shows', icon: Tv, description: 'Explore TV series' },
+    { to: '/trending', label: 'Trending', icon: TrendingUp, description: 'What\'s hot now' },
+    { to: '/watchlist', label: 'Watchlist', icon: Bookmark, description: 'Your saved items' },
   ];
 
   return (
@@ -64,34 +77,83 @@ export default function Navbar() {
             <Logo size="md" />
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link, index) => (
+          {/* Desktop Navigation Dropdown */}
+          <div className="hidden md:block relative" ref={dropdownRef}>
+            <motion.button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] hover:border-white/[0.15] transition-all duration-300 text-sm font-medium"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <span className="text-white/80">Browse</span>
               <motion.div
-                key={link.to}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                animate={{ rotate: dropdownOpen ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
               >
-                <Link
-                  to={link.to}
-                  className={`relative px-4 py-2 rounded-full text-[13px] font-medium transition-all duration-300 ${
-                    location.pathname === link.to
-                      ? 'text-white'
-                      : 'text-white/60 hover:text-white'
-                  }`}
-                >
-                  {location.pathname === link.to && (
-                    <motion.span
-                      className="absolute inset-0 bg-white/[0.08] border border-white/[0.08] rounded-full"
-                      layoutId="navbar-bg"
-                      transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                    />
-                  )}
-                  <span className="relative z-10">{link.label}</span>
-                </Link>
+                <ChevronDown size={16} strokeWidth={2.5} className="text-white/60" />
               </motion.div>
-            ))}
+            </motion.button>
+
+            <AnimatePresence>
+              {dropdownOpen && (
+                <motion.div
+                  className="absolute top-full left-0 mt-2 w-64 bg-dark-lighter/95 backdrop-blur-2xl border border-white/[0.08] rounded-2xl shadow-2xl shadow-black/50 overflow-hidden z-50"
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <div className="p-2">
+                    {navLinks.map((link, index) => {
+                      const Icon = link.icon;
+                      const isActive = location.pathname === link.to;
+                      return (
+                        <motion.div
+                          key={link.to}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                        >
+                          <Link
+                            to={link.to}
+                            onClick={() => setDropdownOpen(false)}
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                              isActive
+                                ? 'bg-primary/20 border border-primary/30'
+                                : 'hover:bg-white/[0.06]'
+                            }`}
+                          >
+                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                              isActive
+                                ? 'bg-primary/30'
+                                : 'bg-white/[0.06]'
+                            }`}>
+                              <Icon size={18} strokeWidth={2.25} className={isActive ? 'text-primary' : 'text-white/70'} />
+                            </div>
+                            <div className="flex-1">
+                              <div className={`text-sm font-medium ${isActive ? 'text-primary' : 'text-white'}`}>
+                                {link.label}
+                              </div>
+                              <div className="text-xs text-white/40">{link.description}</div>
+                            </div>
+                            {isActive && (
+                              <motion.div
+                                className="w-1.5 h-1.5 rounded-full bg-primary"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                              />
+                            )}
+                          </Link>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Search, Auth & Mobile Menu */}
@@ -198,25 +260,40 @@ export default function Navbar() {
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="px-4 py-4 space-y-1">
-              {navLinks.map((link, index) => (
-                <motion.div
-                  key={link.to}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.05 * index }}
-                >
-                  <Link
-                    to={link.to}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${
-                      location.pathname === link.to
-                        ? 'bg-gradient-to-r from-primary/20 to-transparent text-white border-l-2 border-primary'
-                        : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
-                    }`}
+              {navLinks.map((link, index) => {
+                const Icon = link.icon;
+                const isActive = location.pathname === link.to;
+                return (
+                  <motion.div
+                    key={link.to}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.05 * index }}
                   >
-                    {link.label}
-                  </Link>
-                </motion.div>
-              ))}
+                    <Link
+                      to={link.to}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                        isActive
+                          ? 'bg-gradient-to-r from-primary/20 to-transparent text-white border-l-2 border-primary'
+                          : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
+                      }`}
+                    >
+                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                        isActive ? 'bg-primary/30' : 'bg-white/[0.06]'
+                      }`}>
+                        <Icon size={18} strokeWidth={2.25} className={isActive ? 'text-primary' : 'text-white/70'} />
+                      </div>
+                      <div className="flex-1">
+                        <div className={`text-sm font-medium ${isActive ? 'text-primary' : 'text-white'}`}>
+                          {link.label}
+                        </div>
+                        <div className="text-xs text-white/40">{link.description}</div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
 
               {/* Mobile auth buttons */}
               {!user ? (
