@@ -3,65 +3,189 @@
 @theme {
   --color-primary: #e50914;
   --color-primary-dark: #b20710;
-  --color-dark: #0a0a0a;
-  --color-dark-lighter: #141414;
-  --color-dark-card: #1a1a2e;
-  --color-dark-surface: #16213e;
   --color-gold: #f5c518;
   --font-display: 'Bebas Neue', cursive;
   --font-body: 'Space Grotesk', sans-serif;
   --font-heading: 'Outfit', sans-serif;
 }
 
+/* Dark theme (default) */
+:root {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #141414;
+  --bg-tertiary: #1a1a2e;
+  --bg-surface: #16213e;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-tertiary: rgba(255, 255, 255, 0.5);
+  --text-muted: rgba(255, 255, 255, 0.4);
+  --text-faint: rgba(255, 255, 255, 0.3);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-light: rgba(255, 255, 255, 0.06);
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --card-bg-hover: rgba(255, 255, 255, 0.05);
+}
+
+/* Light theme */
+.light {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #e8e8e8;
+  --bg-surface: #f0f0f0;
+  --text-primary: #0a0a0a;
+  --text-secondary: rgba(0, 0, 0, 0.7);
+  --text-tertiary: rgba(0, 0, 0, 0.5);
+  --text-muted: rgba(0, 0, 0, 0.4);
+  --text-faint: rgba(0, 0, 0, 0.3);
+  --border-color: rgba(0, 0, 0, 0.1);
+  --border-light: rgba(0, 0, 0, 0.06);
+  --card-bg: rgba(0, 0, 0, 0.02);
+  --card-bg-hover: rgba(0, 0, 0, 0.04);
+}
+
 body {
-  background-color: #0a0a0a;
-  color: #ffffff;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Outfit', sans-serif;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
+/* Theme-specific background classes */
+.bg-dark {
+  background-color: var(--bg-primary) !important;
 }
 
-::-webkit-scrollbar-track {
-  background: #141414;
+.bg-dark-lighter {
+  background-color: var(--bg-secondary) !important;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 4px;
+.bg-dark-card {
+  background-color: var(--bg-tertiary) !important;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
+.bg-dark-surface {
+  background-color: var(--bg-surface) !important;
 }
 
-/* Hide scrollbar for horizontal scroll containers */
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
+/* Theme-specific text classes */
+.text-white {
+  color: var(--text-primary) !important;
 }
 
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+.text-white\/70 {
+  color: var(--text-secondary) !important;
+}
+
+.text-white\/60 {
+  color: var(--text-secondary) !important;
+}
+
+.text-white\/50 {
+  color: var(--text-tertiary) !important;
+}
+
+.text-white\/40 {
+  color: var(--text-muted) !important;
+}
+
+.text-white\/30 {
+  color: var(--text-faint) !important;
+}
+
+.text-white\/20 {
+  color: var(--text-faint) !important;
+}
+
+.text-white\/10 {
+  color: var(--text-faint) !important;
+}
+
+/* Theme-specific border classes */
+.border-white\/10 {
+  border-color: var(--border-color) !important;
+}
+
+.border-white\/20 {
+  border-color: var(--border-color) !important;
+}
+
+.border-white\/\[0\.06\] {
+  border-color: var(--border-light) !important;
+}
+
+.border-white\/\[0\.08\] {
+  border-color: var(--border-color) !important;
+}
+
+.border-white\/\[0\.1\] {
+  border-color: var(--border-color) !important;
+}
+
+.border-white\/\[0\.12\] {
+  border-color: var(--border-color) !important;
+}
+
+/* Background with opacity */
+.bg-white\/\[0\.03\] {
+  background-color: var(--card-bg) !important;
+}
+
+.bg-white\/\[0\.04\] {
+  background-color: var(--card-bg) !important;
+}
+
+.bg-white\/\[0\.05\] {
+  background-color: var(--card-bg-hover) !important;
+}
+
+.bg-white\/\[0\.06\] {
+  background-color: var(--card-bg) !important;
+}
+
+.bg-white\/\[0\.08\] {
+  background-color: var(--card-bg-hover) !important;
+}
+
+.bg-white\/\[0\.1\] {
+  background-color: var(--card-bg-hover) !important;
+}
+
+/* Hover states */
+.hover\:bg-white\/\[0\.08\]:hover {
+  background-color: var(--card-bg-hover) !important;
+}
+
+.hover\:bg-white\/\[0\.1\]:hover {
+  background-color: var(--card-bg-hover) !important;
 }
 
 /* Gradient overlays */
 .gradient-bottom {
-  background: linear-gradient(to top, rgba(10, 10, 10, 1) 0%, rgba(10, 10, 10, 0.8) 30%, transparent 100%);
+  background: linear-gradient(to top, var(--bg-primary) 0%, rgba(0, 0, 0, 0.8) 30%, transparent 100%);
+}
+
+.light .gradient-bottom {
+  background: linear-gradient(to top, var(--bg-primary) 0%, rgba(255, 255, 255, 0.8) 30%, transparent 100%);
 }
 
 .gradient-top {
-  background: linear-gradient(to bottom, rgba(10, 10, 10, 0.9) 0%, transparent 100%);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+}
+
+.light .gradient-top {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 0%, transparent 100%);
 }
 
 .gradient-left {
-  background: linear-gradient(to right, rgba(10, 10, 10, 1) 0%, rgba(10, 10, 10, 0.7) 50%, transparent 100%);
+  background: linear-gradient(to right, var(--bg-primary) 0%, rgba(0, 0, 0, 0.7) 50%, transparent 100%);
+}
+
+.light .gradient-left {
+  background: linear-gradient(to right, var(--bg-primary) 0%, rgba(255, 255, 255, 0.7) 50%, transparent 100%);
 }
 
 /* Card hover effects */
@@ -74,23 +198,37 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 10px 40px rgba(229, 9, 20, 0.2);
 }
 
+.light .card-hover:hover {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
 /* Shimmer loading animation */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .shimmer {
-  background: linear-gradient(90deg, #1a1a2e 25%, #2a2a4e 50%, #1a1a2e 75%);
+  background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-surface) 50%, var(--bg-tertiary) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
 
 /* Popcorn animation */
 @keyframes bounce-popcorn {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  25% { transform: translateY(-5px) rotate(5deg); }
-  75% { transform: translateY(-3px) rotate(-5deg); }
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-5px) rotate(5deg);
+  }
+  75% {
+    transform: translateY(-3px) rotate(-5deg);
+  }
 }
 
 .popcorn-bounce {
@@ -99,8 +237,12 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Floating animation */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .animate-float {
@@ -109,8 +251,12 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Pulse glow */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(229, 9, 20, 0.3); }
-  50% { box-shadow: 0 0 40px rgba(229, 9, 20, 0.6); }
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(229, 9, 20, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(229, 9, 20, 0.6);
+  }
 }
 
 .animate-pulse-glow {
@@ -119,9 +265,15 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Gradient text animation */
 @keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .animate-gradient {
@@ -195,6 +347,11 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.light .glass {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
 /* Neon glow effect */
 .neon-text {
   text-shadow: 0 0 10px rgba(229, 9, 20, 0.8),
@@ -205,4 +362,32 @@ h1, h2, h3, h4, h5, h6 {
 /* Smooth page transitions */
 .page-transition {
   animation: fade-in 0.3s ease-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* Hide scrollbar for horizontal scroll containers */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

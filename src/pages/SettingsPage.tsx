@@ -5,6 +5,7 @@ import {
   Monitor, Smartphone, Wifi, Check, Save, Play 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 interface Settings {
   theme: 'dark' | 'light';
@@ -54,6 +55,7 @@ const DEFAULT_SETTINGS: Settings = {
 
 export default function SettingsPage() {
   const { user } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [hasChanges, setHasChanges] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -63,9 +65,14 @@ export default function SettingsPage() {
     // Load settings from localStorage
     const stored = localStorage.getItem('moviepopcorn_settings');
     if (stored) {
-      setSettings(JSON.parse(stored));
+      const parsed = JSON.parse(stored);
+      setSettings(parsed);
+      // Sync theme from settings
+      if (parsed.theme) {
+        setTheme(parsed.theme);
+      }
     }
-  }, []);
+  }, [setTheme]);
 
   const updateSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
     setSettings(prev => ({ ...prev, [key]: value }));
@@ -182,47 +189,52 @@ export default function SettingsPage() {
           </h2>
 
           <div className="space-y-4">
-            {/* Theme */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {settings.theme === 'dark' ? (
-                  <Moon size={20} strokeWidth={2} className="text-white/60" />
-                ) : (
-                  <Sun size={20} strokeWidth={2} className="text-white/60" />
-                )}
-                <div>
-                  <p className="text-sm font-medium text-white">Theme</p>
-                  <p className="text-xs text-white/40">Choose your preferred theme</p>
+              {/* Theme */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {theme === 'dark' ? (
+                    <Moon size={20} strokeWidth={2} className="text-white/60" />
+                  ) : (
+                    <Sun size={20} strokeWidth={2} className="text-white/60" />
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-white">Theme</p>
+                    <p className="text-xs text-white/40">Choose your preferred theme</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <motion.button
-                  onClick={() => updateSetting('theme', 'dark')}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                    settings.theme === 'dark'
-                      ? 'bg-gradient-to-r from-primary to-primary-dark text-white'
-                      : 'bg-white/[0.04] border border-white/[0.08] text-white/60 hover:bg-white/[0.08]'
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Dark
-                </motion.button>
-                <motion.button
-                  onClick={() => updateSetting('theme', 'light')}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                    settings.theme === 'light'
-                      ? 'bg-gradient-to-r from-primary to-primary-dark text-white'
-                      : 'bg-white/[0.04] border border-white/[0.08] text-white/60 hover:bg-white/[0.08]'
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Light
-                </motion.button>
-              </div>
-            </div>
-          </div>
+                <div className="flex gap-2">
+                  <motion.button
+                    onClick={() => {
+                      setTheme('dark');
+                      updateSetting('theme', 'dark');
+                    }}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                      theme === 'dark'
+                        ? 'bg-gradient-to-r from-primary to-primary-dark text-white'
+                        : 'bg-white/[0.04] border border-white/[0.08] text-white/60 hover:bg-white/[0.08]'
+                    }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Dark
+                  </motion.button>
+                  <motion.button
+                    onClick={() => {
+                      setTheme('light');
+                      updateSetting('theme', 'light');
+                    }}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                      theme === 'light'
+                        ? 'bg-gradient-to-r from-primary to-primary-dark text-white'
+                        : 'bg-white/[0.04] border border-white/[0.08] text-white/60 hover:bg-white/[0.08]'
+                    }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Light
+                  </motion.button>
+                </div>
+              </div>          </div>
         </motion.div>
 
         {/* Playback Section */}

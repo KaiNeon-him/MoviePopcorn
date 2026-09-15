@@ -53,8 +53,9 @@
             }
           });
         } else {
-          // 非 iframe 环境，使用默认 dark 主题
-          applyThemeToDOM("dark");
+          // 非 iframe 环境，检查 localStorage 中的主题设置
+          const storedTheme = localStorage.getItem('moviepopcorn_theme');
+          applyThemeToDOM(storedTheme || "dark");
         }
       })();
     </script>
