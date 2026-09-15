@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Search as SearchIcon } from 'lucide-react';
 import { Movie, searchMulti } from '../api/tmdb';
 import MovieCard from '../components/MovieCard';
@@ -23,15 +24,29 @@ export default function SearchPage() {
   }, [query]);
 
   return (
-    <div className="min-h-screen bg-dark pt-24 px-4 sm:px-8 lg:px-12">
+    <motion.div
+      className="min-h-screen bg-dark pt-24 px-4 sm:px-8 lg:px-12 page-transition"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-2">
+        <motion.h1
+          className="text-3xl font-bold text-white mb-2"
+          style={{ fontFamily: "'Outfit', sans-serif" }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
           {query ? `Search results for "${query}"` : 'Search'}
-        </h1>
+        </motion.h1>
         {searched && !loading && (
-          <p className="text-white/50 mb-8">
+          <motion.p
+            className="text-white/50 mb-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
             {results.length} result{results.length !== 1 ? 's' : ''} found
-          </p>
+          </motion.p>
         )}
 
         {loading && (
@@ -43,29 +58,51 @@ export default function SearchPage() {
         )}
 
         {!loading && results.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {results.map((movie) => (
-              <MovieCard key={movie.id} movie={movie} />
+          <motion.div
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            {results.map((movie, index) => (
+              <MovieCard key={movie.id} movie={movie} index={index} />
             ))}
-          </div>
+          </motion.div>
         )}
 
         {!loading && searched && results.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20">
-            <SearchIcon size={64} className="text-white/20 mb-4" />
+          <motion.div
+            className="flex flex-col items-center justify-center py-20"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+          >
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <SearchIcon size={64} className="text-white/20 mb-4" />
+            </motion.div>
             <p className="text-white/50 text-xl">No results found</p>
             <p className="text-white/30 text-sm mt-2">Try a different search term</p>
-          </div>
+          </motion.div>
         )}
 
         {!searched && (
-          <div className="flex flex-col items-center justify-center py-20">
-            <SearchIcon size={64} className="text-white/20 mb-4" />
+          <motion.div
+            className="flex flex-col items-center justify-center py-20"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <SearchIcon size={64} className="text-white/20 mb-4" />
+            </motion.div>
             <p className="text-white/50 text-xl">Search for movies & TV shows</p>
             <p className="text-white/30 text-sm mt-2">Use the search bar above to find content</p>
-          </div>
+          </motion.div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

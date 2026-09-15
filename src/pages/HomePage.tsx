@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import Hero from '../components/Hero';
 import MovieRow from '../components/MovieRow';
+import WatchedRecently from '../components/WatchedRecently';
 import { Movie, fetchPopularMovies, fetchTopRatedMovies, fetchPopularTV, fetchNowPlaying, fetchUpcoming, fetchTrending } from '../api/tmdb';
 
 export default function HomePage() {
@@ -21,16 +23,22 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-dark">
+    <motion.div
+      className="min-h-screen bg-dark"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       <Hero />
       <div className="-mt-20 relative z-10">
-        <MovieRow title="🔥 Trending Now" movies={trending} />
-        <MovieRow title="🎬 Now Playing" movies={nowPlaying} mediaType="movie" />
-        <MovieRow title="⭐ Top Rated Movies" movies={topRated} mediaType="movie" />
-        <MovieRow title="📺 Popular TV Shows" movies={popularTV} mediaType="tv" />
-        <MovieRow title="🍿 Popular Movies" movies={popular} mediaType="movie" />
-        <MovieRow title="🎭 Coming Soon" movies={upcoming} mediaType="movie" />
+        <WatchedRecently />
+        <MovieRow title="Trending Now" movies={trending} icon="🔥" />
+        <MovieRow title="Now Playing" movies={nowPlaying} mediaType="movie" icon="🎬" />
+        <MovieRow title="Top Rated Movies" movies={topRated} mediaType="movie" icon="⭐" />
+        <MovieRow title="Popular TV Shows" movies={popularTV} mediaType="tv" icon="📺" />
+        <MovieRow title="Popular Movies" movies={popular} mediaType="movie" icon="🍿" />
+        <MovieRow title="Coming Soon" movies={upcoming} mediaType="movie" icon="🎭" />
       </div>
-    </div>
+    </motion.div>
   );
 }
