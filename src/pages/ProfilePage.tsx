@@ -4,11 +4,13 @@ import { User as UserIcon, Mail, Lock, Camera, Save, Check, X, Eye, EyeOff } fro
 import { useAuth } from '../context/AuthContext';
 import { useWatchHistory } from '../hooks/useWatchHistory';
 import { useWatchlist } from '../hooks/useWatchlist';
+import { useNotifications } from '../components/NotificationToast';
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuth();
   const { history } = useWatchHistory();
   const { watchlist } = useWatchlist();
+  const { success, error: showError } = useNotifications();
 
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');
@@ -17,7 +19,6 @@ export default function ProfilePage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPasswords, setShowPasswords] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
   const [error, setError] = useState('');
 
   const handleSave = () => {
@@ -50,8 +51,7 @@ export default function ProfilePage() {
     setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
+    success('Profile Updated', 'Your profile has been updated successfully');
   };
 
   const handleCancel = () => {
@@ -94,21 +94,6 @@ export default function ProfilePage() {
           </h1>
           <p className="text-white/50 text-sm">Manage your account settings and preferences</p>
         </motion.div>
-
-        {/* Success message */}
-        {saveSuccess && (
-          <motion.div
-            className="mb-6 p-4 rounded-2xl bg-green-500/10 border border-green-500/30 flex items-center gap-3"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-          >
-            <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
-              <Check size={14} strokeWidth={3} className="text-green-400" />
-            </div>
-            <p className="text-sm text-green-300 font-medium">Profile updated successfully!</p>
-          </motion.div>
-        )}
 
         {/* Error message */}
         {error && (

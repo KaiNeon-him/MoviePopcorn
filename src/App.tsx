@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { SettingsProvider } from './context/SettingsContext';
+import { NotificationProvider } from './components/NotificationToast';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import SplashScreen from './components/SplashScreen';
@@ -49,17 +51,21 @@ function AppContent() {
 export default function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        {/* Splash screen rendered via portal into document.body — completely isolated
-            from the router tree below, so it cannot disrupt the <BrowserRouter> context. */}
-        <SplashScreen />
+      <SettingsProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            {/* Splash screen rendered via portal into document.body — completely isolated
+                from the router tree below, so it cannot disrupt the <BrowserRouter> context. */}
+            <SplashScreen />
 
-        {/* The entire app lives inside a single stable <BrowserRouter> that never
-            unmounts, ensuring useNavigate/useLocation always have a valid context. */}
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
-      </AuthProvider>
+            {/* The entire app lives inside a single stable <BrowserRouter> that never
+                unmounts, ensuring useNavigate/useLocation always have a valid context. */}
+            <BrowserRouter>
+              <AppContent />
+            </BrowserRouter>
+          </NotificationProvider>
+        </AuthProvider>
+      </SettingsProvider>
     </ThemeProvider>
   );
 }

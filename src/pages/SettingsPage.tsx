@@ -1,110 +1,31 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Moon, Sun, Globe, Bell, Shield, Film, Volume2, 
-  Monitor, Smartphone, Wifi, Check, Save, Play 
+  Monitor, Smartphone, Wifi, Check, Save, Play, 
+  User, Lock, Download, RotateCcw, Trash2
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-
-interface Settings {
-  autoplay: boolean;
-  autoplayNext: boolean;
-  videoQuality: 'auto' | 'low' | 'medium' | 'high';
-  subtitles: boolean;
-  subtitleLanguage: string;
-  audioLanguage: string;
-  notifications: {
-    newReleases: boolean;
-    recommendations: boolean;
-    watchlistUpdates: boolean;
-  };
-  parentalControls: {
-    enabled: boolean;
-    pin: string;
-  };
-  dataUsage: {
-    mobileData: boolean;
-    downloadQuality: 'low' | 'medium' | 'high';
-  };
-}
-
-const DEFAULT_SETTINGS: Settings = {
-  autoplay: true,
-  autoplayNext: true,
-  videoQuality: 'high',
-  subtitles: false,
-  subtitleLanguage: 'en',
-  audioLanguage: 'en',
-  notifications: {
-    newReleases: true,
-    recommendations: true,
-    watchlistUpdates: false,
-  },
-  parentalControls: {
-    enabled: false,
-    pin: '',
-  },
-  dataUsage: {
-    mobileData: true,
-    downloadQuality: 'high',
-  },
-};
+import { useSettings } from '../context/SettingsContext';
+import { useNotifications } from '../components/NotificationToast';
 
 export default function SettingsPage() {
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
-  const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
-  const [showPinInput, setShowPinInput] = useState(false);
-
-  useEffect(() => {
-    // Load settings from localStorage (but not theme - that's managed by ThemeContext)
-    const stored = localStorage.getItem('moviepopcorn_settings');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      // Remove theme from loaded settings to avoid conflicts
-      const { theme: _, ...rest } = parsed;
-      setSettings({ ...DEFAULT_SETTINGS, ...rest });
-    }
-  }, []);
-
-  const updateSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
-    setHasChanges(true);
-  };
-
-  const updateNotification = (key: keyof Settings['notifications'], value: boolean) => {
-    setSettings(prev => ({
-      ...prev,
-      notifications: { ...prev.notifications, [key]: value }
-    }));
-    setHasChanges(true);
-  };
-
-  const updateParentalControl = (key: keyof Settings['parentalControls'], value: any) => {
-    setSettings(prev => ({
-      ...prev,
-      parentalControls: { ...prev.parentalControls, [key]: value }
-    }));
-    setHasChanges(true);
-  };
-
-  const updateDataUsage = (key: keyof Settings['dataUsage'], value: any) => {
-    setSettings(prev => ({
-      ...prev,
-      dataUsage: { ...prev.dataUsage, [key]: value }
-    }));
-    setHasChanges(true);
-  };
-
-  const handleSave = () => {
-    localStorage.setItem('moviepopcorn_settings', JSON.stringify(settings));
-    setHasChanges(false);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
-  };
+  const { 
+    settings, 
+    updateSettings, 
+    updateNotifications, 
+    updateParentalControls, 
+    updateDataUsage,
+    updateAccount,
+    resetSettings 
+  } = useSettings();
+  const { success, error: showError, warning, info } = useNotifications();
+  
+  const [showPinInput, setShowPinInput] = useState(settings.parentalControls.enabled);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const ToggleSwitch = ({ enabled, onChange }: { enabled: boolean; onChange: (value: boolean) => void }) => (
     <motion.button
@@ -121,6 +42,12 @@ export default function SettingsPage() {
       />
     </motion.button>
   );
+
+  const handleReset = () => {
+    resetSettings();
+    setShowResetConfirm(false);
+    success('Settings Reset', 'All settings have been restored to defaults');
+  };
 
   return (
     <motion.div
@@ -142,35 +69,16 @@ export default function SettingsPage() {
             <p className="text-white/50 text-sm">Customize your MoviePopcorn experience</p>
           </div>
 
-          {hasChanges && (
-            <motion.button
-              onClick={handleSave}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-primary-dark text-white font-semibold text-sm shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Save size={16} strokeWidth={2.5} />
-              Save Changes
-            </motion.button>
-          )}
-        </motion.div>
-
-        {/* Success message */}
-        {saveSuccess && (
-          <motion.div
-            className="mb-6 p-4 rounded-2xl bg-green-500/10 border border-green-500/30 flex items-center gap-3"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+          <motion.button
+            onClick={() => setShowResetConfirm(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/70 hover:bg-white/[0.08] hover:text-white transition-all duration-300 text-sm font-medium"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
-              <Check size={14} strokeWidth={3} className="text-green-400" />
-            </div>
-            <p className="text-sm text-green-300 font-medium">Settings saved successfully!</p>
-          </motion.div>
-        )}
+            <RotateCcw size={16} strokeWidth={2.5} />
+            Reset All
+          </motion.button>
+        </motion.div>
 
         {/* Appearance Section */}
         <motion.div
@@ -185,52 +93,59 @@ export default function SettingsPage() {
           </h2>
 
           <div className="space-y-4">
-              {/* Theme */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {theme === 'dark' ? (
-                    <Moon size={20} strokeWidth={2} className="text-white/60" />
-                  ) : (
-                    <Sun size={20} strokeWidth={2} className="text-white/60" />
-                  )}
-                  <div>
-                    <p className="text-sm font-medium text-white">Theme</p>
-                    <p className="text-xs text-white/40">Choose your preferred theme</p>
-                  </div>
+            {/* Theme */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {theme === 'dark' ? (
+                  <Moon size={20} strokeWidth={2} className="text-white/60" />
+                ) : (
+                  <Sun size={20} strokeWidth={2} className="text-white/60" />
+                )}
+                <div>
+                  <p className="text-sm font-medium text-white">Theme</p>
+                  <p className="text-xs text-white/40">Choose your preferred theme</p>
                 </div>
-                <div className="flex gap-2">
-                  <motion.button
-                    onClick={() => setTheme('dark')}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                      theme === 'dark'
-                        ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-lg shadow-primary/30'
-                        : 'bg-white/[0.04] border border-white/[0.08] text-white/60 hover:bg-white/[0.08] hover:text-white'
-                    }`}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <span className="flex items-center gap-2">
-                      <Moon size={14} strokeWidth={2.5} />
-                      Dark
-                    </span>
-                  </motion.button>
-                  <motion.button
-                    onClick={() => setTheme('light')}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                      theme === 'light'
-                        ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-lg shadow-primary/30'
-                        : 'bg-white/[0.04] border border-white/[0.08] text-white/60 hover:bg-white/[0.08] hover:text-white'
-                    }`}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <span className="flex items-center gap-2">
-                      <Sun size={14} strokeWidth={2.5} />
-                      Light
-                    </span>
-                  </motion.button>
-                </div>
-              </div>          </div>
+              </div>
+              <div className="flex gap-2">
+                <motion.button
+                  onClick={() => {
+                    setTheme('dark');
+                    success('Theme Changed', 'Switched to dark mode');
+                  }}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                    theme === 'dark'
+                      ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-lg shadow-primary/30'
+                      : 'bg-white/[0.04] border border-white/[0.08] text-white/60 hover:bg-white/[0.08] hover:text-white'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <span className="flex items-center gap-2">
+                    <Moon size={14} strokeWidth={2.5} />
+                    Dark
+                  </span>
+                </motion.button>
+                <motion.button
+                  onClick={() => {
+                    setTheme('light');
+                    success('Theme Changed', 'Switched to light mode');
+                  }}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                    theme === 'light'
+                      ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-lg shadow-primary/30'
+                      : 'bg-white/[0.04] border border-white/[0.08] text-white/60 hover:bg-white/[0.08] hover:text-white'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <span className="flex items-center gap-2">
+                    <Sun size={14} strokeWidth={2.5} />
+                    Light
+                  </span>
+                </motion.button>
+              </div>
+            </div>
+          </div>
         </motion.div>
 
         {/* Playback Section */}
@@ -257,7 +172,10 @@ export default function SettingsPage() {
               </div>
               <ToggleSwitch 
                 enabled={settings.autoplay} 
-                onChange={(value) => updateSetting('autoplay', value)} 
+                onChange={(value) => {
+                  updateSettings({ autoplay: value });
+                  info('Autoplay Updated', value ? 'Videos will autoplay' : 'Videos will not autoplay');
+                }}
               />
             </div>
 
@@ -272,7 +190,10 @@ export default function SettingsPage() {
               </div>
               <ToggleSwitch 
                 enabled={settings.autoplayNext} 
-                onChange={(value) => updateSetting('autoplayNext', value)} 
+                onChange={(value) => {
+                  updateSettings({ autoplayNext: value });
+                  info('Autoplay Next Updated', value ? 'Next episode will autoplay' : 'Next episode will not autoplay');
+                }}
               />
             </div>
 
@@ -287,14 +208,39 @@ export default function SettingsPage() {
               </div>
               <select
                 value={settings.videoQuality}
-                onChange={(e) => updateSetting('videoQuality', e.target.value as any)}
-                className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-primary/50 transition-all"
+                onChange={(e) => {
+                  updateSettings({ videoQuality: e.target.value as any });
+                  success('Quality Updated', `Video quality set to ${e.target.value}`);
+                }}
+                className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-primary/50 transition-all cursor-pointer"
               >
                 <option value="auto">Auto</option>
                 <option value="low">Low (480p)</option>
                 <option value="medium">Medium (720p)</option>
                 <option value="high">High (1080p)</option>
               </select>
+            </div>
+
+            {/* Volume */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Volume2 size={20} strokeWidth={2} className="text-white/60" />
+                <div>
+                  <p className="text-sm font-medium text-white">Default Volume</p>
+                  <p className="text-xs text-white/40">Starting volume for videos</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={settings.volume}
+                  onChange={(e) => updateSettings({ volume: Number(e.target.value) })}
+                  className="w-32 h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
+                />
+                <span className="text-sm text-white/70 w-10 text-right">{settings.volume}%</span>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -323,7 +269,10 @@ export default function SettingsPage() {
               </div>
               <ToggleSwitch 
                 enabled={settings.subtitles} 
-                onChange={(value) => updateSetting('subtitles', value)} 
+                onChange={(value) => {
+                  updateSettings({ subtitles: value });
+                  info('Subtitles Updated', value ? 'Subtitles enabled' : 'Subtitles disabled');
+                }}
               />
             </div>
 
@@ -338,8 +287,11 @@ export default function SettingsPage() {
               </div>
               <select
                 value={settings.subtitleLanguage}
-                onChange={(e) => updateSetting('subtitleLanguage', e.target.value)}
-                className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-primary/50 transition-all"
+                onChange={(e) => {
+                  updateSettings({ subtitleLanguage: e.target.value });
+                  success('Subtitle Language Updated', `Subtitles set to ${e.target.value}`);
+                }}
+                className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-primary/50 transition-all cursor-pointer"
               >
                 <option value="en">English</option>
                 <option value="es">Spanish</option>
@@ -364,8 +316,11 @@ export default function SettingsPage() {
               </div>
               <select
                 value={settings.audioLanguage}
-                onChange={(e) => updateSetting('audioLanguage', e.target.value)}
-                className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-primary/50 transition-all"
+                onChange={(e) => {
+                  updateSettings({ audioLanguage: e.target.value });
+                  success('Audio Language Updated', `Audio set to ${e.target.value}`);
+                }}
+                className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-primary/50 transition-all cursor-pointer"
               >
                 <option value="en">English</option>
                 <option value="es">Spanish</option>
@@ -402,7 +357,10 @@ export default function SettingsPage() {
               </div>
               <ToggleSwitch 
                 enabled={settings.notifications.newReleases} 
-                onChange={(value) => updateNotification('newReleases', value)} 
+                onChange={(value) => {
+                  updateNotifications({ newReleases: value });
+                  info('Notification Updated', value ? 'New release notifications enabled' : 'New release notifications disabled');
+                }}
               />
             </div>
 
@@ -414,7 +372,10 @@ export default function SettingsPage() {
               </div>
               <ToggleSwitch 
                 enabled={settings.notifications.recommendations} 
-                onChange={(value) => updateNotification('recommendations', value)} 
+                onChange={(value) => {
+                  updateNotifications({ recommendations: value });
+                  info('Notification Updated', value ? 'Recommendation notifications enabled' : 'Recommendation notifications disabled');
+                }}
               />
             </div>
 
@@ -426,9 +387,27 @@ export default function SettingsPage() {
               </div>
               <ToggleSwitch 
                 enabled={settings.notifications.watchlistUpdates} 
-                onChange={(value) => updateNotification('watchlistUpdates', value)} 
+                onChange={(value) => {
+                  updateNotifications({ watchlistUpdates: value });
+                  info('Notification Updated', value ? 'Watchlist notifications enabled' : 'Watchlist notifications disabled');
+                }}
               />
             </div>
+
+            {/* Test notification button */}
+            <motion.button
+              onClick={() => {
+                success('Test Notification', 'This is a test notification!');
+              }}
+              className="w-full mt-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/70 hover:bg-white/[0.08] hover:text-white font-semibold text-sm transition-all"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <span className="flex items-center justify-center gap-2">
+                <Bell size={16} strokeWidth={2.5} />
+                Test Notifications
+              </span>
+            </motion.button>
           </div>
         </motion.div>
 
@@ -454,9 +433,14 @@ export default function SettingsPage() {
               <ToggleSwitch 
                 enabled={settings.parentalControls.enabled} 
                 onChange={(value) => {
-                  updateParentalControl('enabled', value);
-                  if (value) setShowPinInput(true);
-                }} 
+                  updateParentalControls({ enabled: value });
+                  setShowPinInput(value);
+                  if (value) {
+                    warning('Parental Controls Enabled', 'Set a PIN to protect your settings');
+                  } else {
+                    info('Parental Controls Disabled', 'All content is now accessible');
+                  }
+                }}
               />
             </div>
 
@@ -466,16 +450,54 @@ export default function SettingsPage() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
+                className="space-y-3"
               >
                 <label className="block text-xs text-white/50 mb-2">Security PIN (4 digits)</label>
                 <input
                   type="password"
                   maxLength={4}
                   value={settings.parentalControls.pin}
-                  onChange={(e) => updateParentalControl('pin', e.target.value.replace(/\D/g, ''))}
+                  onChange={(e) => {
+                    const pin = e.target.value.replace(/\D/g, '');
+                    updateParentalControls({ pin });
+                  }}
                   placeholder="Enter 4-digit PIN"
                   className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-primary/50 transition-all"
                 />
+                {settings.parentalControls.pin && (
+                  <p className="text-xs text-green-400 flex items-center gap-1.5">
+                    <Check size={12} strokeWidth={3} />
+                    PIN set successfully
+                  </p>
+                )}
+              </motion.div>
+            )}
+
+            {/* Age Restriction */}
+            {settings.parentalControls.enabled && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex items-center justify-between"
+              >
+                <div>
+                  <p className="text-sm font-medium text-white">Age Restriction</p>
+                  <p className="text-xs text-white/40">Maximum allowed content rating</p>
+                </div>
+                <select
+                  value={settings.parentalControls.ageRestriction}
+                  onChange={(e) => {
+                    updateParentalControls({ ageRestriction: Number(e.target.value) });
+                    success('Age Restriction Updated', `Content limited to ${e.target.value}+`);
+                  }}
+                  className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-primary/50 transition-all cursor-pointer"
+                >
+                  <option value={0}>All Ages</option>
+                  <option value={7}>7+</option>
+                  <option value={13}>13+</option>
+                  <option value={17}>17+</option>
+                  <option value={18}>18+</option>
+                </select>
               </motion.div>
             )}
           </div>
@@ -505,14 +527,21 @@ export default function SettingsPage() {
               </div>
               <ToggleSwitch 
                 enabled={settings.dataUsage.mobileData} 
-                onChange={(value) => updateDataUsage('mobileData', value)} 
+                onChange={(value) => {
+                  updateDataUsage({ mobileData: value });
+                  if (!value) {
+                    warning('Mobile Data Disabled', 'Streaming will only work on WiFi');
+                  } else {
+                    info('Mobile Data Enabled', 'Streaming allowed on mobile data');
+                  }
+                }}
               />
             </div>
 
             {/* Download Quality */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Wifi size={20} strokeWidth={2} className="text-white/60" />
+                <Download size={20} strokeWidth={2} className="text-white/60" />
                 <div>
                   <p className="text-sm font-medium text-white">Download Quality</p>
                   <p className="text-xs text-white/40">Quality for offline downloads</p>
@@ -520,8 +549,11 @@ export default function SettingsPage() {
               </div>
               <select
                 value={settings.dataUsage.downloadQuality}
-                onChange={(e) => updateDataUsage('downloadQuality', e.target.value)}
-                className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-primary/50 transition-all"
+                onChange={(e) => {
+                  updateDataUsage({ downloadQuality: e.target.value as any });
+                  success('Download Quality Updated', `Downloads set to ${e.target.value} quality`);
+                }}
+                className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-primary/50 transition-all cursor-pointer"
               >
                 <option value="low">Low (saves data)</option>
                 <option value="medium">Medium</option>
@@ -530,6 +562,118 @@ export default function SettingsPage() {
             </div>
           </div>
         </motion.div>
+
+        {/* Account Section */}
+        <motion.div
+          className="bg-white/[0.03] border border-white/[0.08] rounded-3xl p-6 mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+        >
+          <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <User size={20} strokeWidth={2.5} className="text-primary" />
+            Account
+          </h2>
+
+          <div className="space-y-4">
+            {/* Private Profile */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-white">Private Profile</p>
+                <p className="text-xs text-white/40">Hide your profile from other users</p>
+              </div>
+              <ToggleSwitch 
+                enabled={settings.account.privateProfile} 
+                onChange={(value) => {
+                  updateAccount({ privateProfile: value });
+                  info('Privacy Updated', value ? 'Profile is now private' : 'Profile is now public');
+                }}
+              />
+            </div>
+
+            {/* Show Watch History */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-white">Show Watch History</p>
+                <p className="text-xs text-white/40">Display your watch history on profile</p>
+              </div>
+              <ToggleSwitch 
+                enabled={settings.account.showWatchHistory} 
+                onChange={(value) => {
+                  updateAccount({ showWatchHistory: value });
+                  info('History Visibility Updated', value ? 'Watch history is visible' : 'Watch history is hidden');
+                }}
+              />
+            </div>
+
+            {/* Two-Factor Auth */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Lock size={20} strokeWidth={2} className="text-white/60" />
+                <div>
+                  <p className="text-sm font-medium text-white">Two-Factor Authentication</p>
+                  <p className="text-xs text-white/40">Add an extra layer of security</p>
+                </div>
+              </div>
+              <ToggleSwitch 
+                enabled={settings.account.twoFactor} 
+                onChange={(value) => {
+                  updateAccount({ twoFactor: value });
+                  if (value) {
+                    success('2FA Enabled', 'Two-factor authentication is now active');
+                  } else {
+                    warning('2FA Disabled', 'Two-factor authentication has been turned off');
+                  }
+                }}
+              />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Reset Confirmation Modal */}
+        {showResetConfirm && (
+          <motion.div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            onClick={() => setShowResetConfirm(false)}
+          >
+            <motion.div
+              className="bg-dark-lighter border border-white/[0.08] rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center">
+                <RotateCcw size={28} strokeWidth={2} className="text-yellow-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white text-center mb-2">
+                Reset All Settings?
+              </h3>
+              <p className="text-white/50 text-sm text-center mb-6">
+                This will restore all settings to their default values. This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <motion.button
+                  onClick={() => setShowResetConfirm(false)}
+                  className="flex-1 py-3 rounded-xl bg-white/[0.06] border border-white/[0.08] text-white/70 hover:bg-white/[0.1] hover:text-white font-semibold text-sm transition-all"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Cancel
+                </motion.button>
+                <motion.button
+                  onClick={handleReset}
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold text-sm shadow-lg shadow-yellow-500/30 hover:shadow-xl hover:shadow-yellow-500/40 transition-all"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Reset All
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );
