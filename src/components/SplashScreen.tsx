@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Logo from './Logo';
 
@@ -7,26 +8,29 @@ interface SplashScreenProps {
 }
 
 export default function SplashScreen({ onComplete }: SplashScreenProps) {
-  const [show, setShow] = useState(true);
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setShow(false);
+      setVisible(false);
+      // Wait for exit animation before calling onComplete
       setTimeout(onComplete, 500);
     }, 2500);
     return () => clearTimeout(timer);
   }, [onComplete]);
 
-  return (
+  // Render via portal so it doesn't affect the main component tree / router context
+  return createPortal(
     <AnimatePresence>
-      {show && (
+      {visible && (
         <motion.div
           className="fixed inset-0 z-[100] bg-dark flex flex-col items-center justify-center"
+          initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
           {/* Animated background particles */}
-          <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
             {[...Array(20)].map((_, i) => (
               <motion.div
                 key={i}
@@ -96,6 +100,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
