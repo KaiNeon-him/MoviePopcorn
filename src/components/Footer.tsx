@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Logo from './Logo';
-import { Cookie, Shield, FileText, Copyright, ExternalLink } from 'lucide-react';
+import { Cookie, Shield, FileText, Copyright } from 'lucide-react';
+import { FileDoc, ShieldCheck, Cookie as PhosphorCookie, Copyright as PhosphorCopyright } from '@phosphor-icons/react';
 
 export default function Footer() {
   return (
@@ -87,7 +88,7 @@ export default function Footer() {
                   to="/terms"
                   className="group inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-all duration-300"
                 >
-                  <FileText size={12} strokeWidth={2.5} />
+                  <FileDoc size={14} weight="duotone" />
                   Terms of Service
                 </Link>
               </li>
@@ -96,7 +97,7 @@ export default function Footer() {
                   to="/privacy"
                   className="group inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-all duration-300"
                 >
-                  <Shield size={12} strokeWidth={2.5} />
+                  <ShieldCheck size={14} weight="duotone" />
                   Privacy Policy
                 </Link>
               </li>
@@ -105,7 +106,7 @@ export default function Footer() {
                   to="/cookies"
                   className="group inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-all duration-300"
                 >
-                  <Cookie size={12} strokeWidth={2.5} />
+                  <PhosphorCookie size={14} weight="duotone" />
                   Cookie Policy
                 </Link>
               </li>
@@ -114,7 +115,7 @@ export default function Footer() {
                   to="/dmca"
                   className="group inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-all duration-300"
                 >
-                  <Copyright size={12} strokeWidth={2.5} />
+                  <PhosphorCopyright size={14} weight="duotone" />
                   DMCA Policy
                 </Link>
               </li>

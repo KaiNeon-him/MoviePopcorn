@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Menu, X, Bookmark, User, Settings, LogOut, Home, Film, Tv, TrendingUp, ChevronDown } from 'lucide-react';
+import { Search, Menu, X, Bookmark, User, Settings, LogOut, ChevronDown } from 'lucide-react';
+import { House, FilmStrip, Television, TrendUp, BookmarkSimple } from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Logo from './Logo';
 import UserMenu from './UserMenu';
@@ -52,11 +53,11 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { to: '/', label: 'Home', icon: Home, description: 'Discover new content' },
-    { to: '/movies', label: 'Movies', icon: Film, description: 'Browse all movies' },
-    { to: '/tv', label: 'TV Shows', icon: Tv, description: 'Explore TV series' },
-    { to: '/trending', label: 'Trending', icon: TrendingUp, description: 'What\'s hot now' },
-    { to: '/watchlist', label: 'Watchlist', icon: Bookmark, description: 'Your saved items' },
+    { to: '/', label: 'Home', icon: House, description: 'Discover new content' },
+    { to: '/movies', label: 'Movies', icon: FilmStrip, description: 'Browse all movies' },
+    { to: '/tv', label: 'TV Shows', icon: Television, description: 'Explore TV series' },
+    { to: '/trending', label: 'Trending', icon: TrendUp, description: 'What\'s hot now' },
+    { to: '/watchlist', label: 'Watchlist', icon: BookmarkSimple, description: 'Your saved items' },
   ];
 
   return (
@@ -147,7 +148,7 @@ export default function Navbar() {
                               whileHover={{ scale: 1.1, rotate: 5 }}
                               transition={{ duration: 0.2 }}
                             >
-                              <Icon size={20} strokeWidth={2.25} className={isActive ? 'text-primary' : 'text-white/80 group-hover:text-primary'} />
+                              <Icon size={22} weight="duotone" className={isActive ? 'text-primary' : 'text-white/80 group-hover:text-primary'} />
                             </motion.div>
                             <div className="flex-1">
                               <div className={`text-sm font-semibold ${isActive ? 'text-primary' : 'text-white group-hover:text-primary'} transition-colors`}>
@@ -299,7 +300,7 @@ export default function Navbar() {
                       <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
                         isActive ? 'bg-primary/30' : 'bg-white/[0.06]'
                       }`}>
-                        <Icon size={18} strokeWidth={2.25} className={isActive ? 'text-primary' : 'text-white/70'} />
+                        <Icon size={20} weight="duotone" className={isActive ? 'text-primary' : 'text-white/70'} />
                       </div>
                       <div className="flex-1">
                         <div className={`text-sm font-medium ${isActive ? 'text-primary' : 'text-white'}`}>

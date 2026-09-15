@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, LogOut, Settings, Bookmark, History, ChevronDown } from 'lucide-react';
+import { LogOut, ChevronDown } from 'lucide-react';
+import { UserCircle, GearSix, BookmarkSimple, ClockCounterClockwise } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext';
 
 export default function UserMenu() {
@@ -36,10 +37,10 @@ export default function UserMenu() {
   };
 
   const menuItems = [
-    { icon: User, label: 'Profile', onClick: () => { navigate('/profile'); setIsOpen(false); } },
-    { icon: Bookmark, label: 'Watchlist', onClick: () => { navigate('/watchlist'); setIsOpen(false); } },
-    { icon: History, label: 'Watch History', onClick: () => { navigate('/history'); setIsOpen(false); } },
-    { icon: Settings, label: 'Settings', onClick: () => { navigate('/settings'); setIsOpen(false); } },
+    { icon: UserCircle, label: 'Profile', onClick: () => { navigate('/profile'); setIsOpen(false); } },
+    { icon: BookmarkSimple, label: 'Watchlist', onClick: () => { navigate('/watchlist'); setIsOpen(false); } },
+    { icon: ClockCounterClockwise, label: 'Watch History', onClick: () => { navigate('/history'); setIsOpen(false); } },
+    { icon: GearSix, label: 'Settings', onClick: () => { navigate('/settings'); setIsOpen(false); } },
   ];
 
   return (
@@ -52,7 +53,7 @@ export default function UserMenu() {
       >
         {/* Avatar */}
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-gold flex items-center justify-center text-white text-xs font-bold shadow-lg shadow-primary/20">
-          {initials || <User size={14} strokeWidth={2.5} />}
+          {initials || <UserCircle size={16} weight="duotone" />}
         </div>
         <span className="text-sm font-medium text-white/80 hidden sm:block max-w-24 truncate">
           {user.name.split(' ')[0]}
@@ -87,7 +88,7 @@ export default function UserMenu() {
               <div className="p-4 border-b border-white/[0.06]">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-gold flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-primary/20">
-                    {initials || <User size={16} strokeWidth={2.5} />}
+                    {initials || <UserCircle size={20} weight="duotone" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{user.name}</p>
@@ -107,7 +108,7 @@ export default function UserMenu() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.03 }}
                   >
-                    <item.icon size={16} strokeWidth={2} />
+                    <item.icon size={18} weight="duotone" />
                     <span>{item.label}</span>
                   </motion.button>
                 ))}
