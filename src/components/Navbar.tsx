@@ -43,12 +43,14 @@ export default function Navbar() {
 
   return (
     <motion.nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-dark/95 backdrop-blur-md shadow-lg shadow-black/20' : 'bg-gradient-to-b from-dark/90 to-transparent'
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        isScrolled
+          ? 'bg-dark/80 backdrop-blur-xl border-b border-white/[0.06] shadow-2xl shadow-black/40'
+          : 'bg-gradient-to-b from-dark/80 to-transparent'
       }`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -64,31 +66,31 @@ export default function Navbar() {
                 key={link.to}
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index, duration: 0.3 }}
+                transition={{ delay: 0.1 * index, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               >
                 <Link
                   to={link.to}
-                  className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                  className={`relative px-4 py-2 rounded-full text-[13px] font-medium transition-all duration-300 ${
                     location.pathname === link.to
                       ? 'text-white'
                       : 'text-white/60 hover:text-white'
                   }`}
                 >
-                  {link.label}
                   {location.pathname === link.to && (
-                    <motion.div
-                      className="absolute bottom-0 left-2 right-2 h-0.5 bg-gradient-to-r from-primary to-gold rounded-full"
-                      layoutId="navbar-indicator"
-                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    <motion.span
+                      className="absolute inset-0 bg-white/[0.08] border border-white/[0.08] rounded-full"
+                      layoutId="navbar-bg"
+                      transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                     />
                   )}
+                  <span className="relative z-10">{link.label}</span>
                 </Link>
               </motion.div>
             ))}
           </div>
 
           {/* Search & Mobile Menu */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <AnimatePresence mode="wait">
               {showSearch ? (
                 <motion.form
@@ -98,47 +100,52 @@ export default function Navbar() {
                   initial={{ opacity: 0, width: 0 }}
                   animate={{ opacity: 1, width: 'auto' }}
                   exit={{ opacity: 0, width: 0 }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <motion.input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search movies & TV shows..."
-                    className="bg-dark-lighter border border-white/20 rounded-l-lg px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:border-primary w-48 sm:w-64 transition-all"
-                    autoFocus
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowSearch(false)}
-                    className="bg-dark-lighter border border-l-0 border-white/20 rounded-r-lg px-3 py-2 text-white/60 hover:text-white"
-                  >
-                    <X size={18} />
-                  </button>
+                  <div className="relative flex items-center">
+                    <Search size={16} className="absolute left-3 text-white/40 pointer-events-none" strokeWidth={2.25} />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search..."
+                      className="bg-white/[0.06] border border-white/[0.08] rounded-full pl-9 pr-10 py-2 text-sm text-white placeholder-white/40 focus:outline-none focus:border-primary/50 focus:bg-white/[0.08] w-56 sm:w-72 transition-all"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSearch(false)}
+                      className="absolute right-1.5 p-1.5 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-all"
+                    >
+                      <X size={14} strokeWidth={2.5} />
+                    </button>
+                  </div>
                 </motion.form>
               ) : (
                 <motion.button
                   key="search-btn"
                   onClick={() => setShowSearch(true)}
-                  className="p-2 text-white/70 hover:text-white transition-colors rounded-lg hover:bg-white/10"
-                  whileHover={{ scale: 1.1 }}
+                  className="relative group p-2.5 rounded-full bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-300"
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Search size={22} />
+                  <Search size={17} strokeWidth={2.25} className="text-white/70 group-hover:text-white transition-colors" />
+                  <span className="absolute inset-0 rounded-full bg-primary/0 group-hover:bg-primary/5 transition-colors" />
                 </motion.button>
               )}
             </AnimatePresence>
 
             <motion.button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-white/70 hover:text-white rounded-lg hover:bg-white/10"
-              whileHover={{ scale: 1.1 }}
+              className="md:hidden relative group p-2.5 rounded-full bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-300"
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {mobileMenuOpen ? (
+                <X size={17} strokeWidth={2.25} className="text-white/70 group-hover:text-white transition-colors" />
+              ) : (
+                <Menu size={17} strokeWidth={2.25} className="text-white/70 group-hover:text-white transition-colors" />
+              )}
             </motion.button>
           </div>
         </div>
@@ -148,11 +155,11 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            className="md:hidden bg-dark-lighter/95 backdrop-blur-md border-t border-white/10"
+            className="md:hidden bg-dark-lighter/95 backdrop-blur-2xl border-t border-white/[0.06]"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="px-4 py-4 space-y-1">
               {navLinks.map((link, index) => (
@@ -164,10 +171,10 @@ export default function Navbar() {
                 >
                   <Link
                     to={link.to}
-                    className={`block px-4 py-3 rounded-lg font-medium transition-all ${
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${
                       location.pathname === link.to
-                        ? 'bg-primary/20 text-primary'
-                        : 'text-white/70 hover:text-white hover:bg-white/5'
+                        ? 'bg-gradient-to-r from-primary/20 to-transparent text-white border-l-2 border-primary'
+                        : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
                     }`}
                   >
                     {link.label}

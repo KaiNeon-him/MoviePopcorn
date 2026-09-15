@@ -109,10 +109,10 @@ export default function MoviePage() {
         >
           <Link
             to="/"
-            className="absolute top-20 left-4 sm:left-8 flex items-center gap-2 text-white/70 hover:text-white transition-colors bg-black/30 backdrop-blur-sm px-3 py-2 rounded-lg"
+            className="absolute top-20 left-4 sm:left-8 group inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/[0.06] border border-white/[0.1] backdrop-blur-xl hover:bg-white/[0.1] hover:border-white/[0.2] transition-all duration-300"
           >
-            <ArrowLeft size={18} />
-            <span className="text-sm">Back</span>
+            <ArrowLeft size={16} strokeWidth={2.5} className="text-white/70 group-hover:text-white transition-colors" />
+            <span className="text-sm font-medium text-white/70 group-hover:text-white transition-colors">Back</span>
           </Link>
         </motion.div>
       </motion.div>
@@ -130,7 +130,7 @@ export default function MoviePage() {
             <img
               src={getImageUrl(movie.poster_path, 'w500')}
               alt={movie.title || ''}
-              className="w-48 sm:w-64 rounded-xl shadow-2xl mx-auto md:mx-0"
+              className="w-48 sm:w-64 rounded-2xl shadow-2xl shadow-black/50 ring-1 ring-white/[0.1] mx-auto md:mx-0"
             />
           </motion.div>
 
@@ -159,28 +159,28 @@ export default function MoviePage() {
             )}
 
             <motion.div
-              className="flex flex-wrap items-center gap-4 mb-6"
+              className="flex flex-wrap items-center gap-3 mb-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
             >
-              <span className="flex items-center gap-1 text-gold">
-                <Star size={18} fill="currentColor" />
-                <span className="font-bold">{movie.vote_average.toFixed(1)}</span>
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm">
+                <Star size={14} className="text-gold" fill="currentColor" strokeWidth={2.5} />
+                <span className="font-bold text-white text-sm">{movie.vote_average.toFixed(1)}</span>
               </span>
               {movie.release_date && (
-                <span className="flex items-center gap-1 text-white/60">
-                  <Calendar size={16} />
-                  {new Date(movie.release_date).getFullYear()}
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm">
+                  <Calendar size={14} strokeWidth={2.25} className="text-white/60" />
+                  <span className="text-white/70 text-sm">{new Date(movie.release_date).getFullYear()}</span>
                 </span>
               )}
               {movie.runtime && (
-                <span className="flex items-center gap-1 text-white/60">
-                  <Clock size={16} />
-                  {Math.floor(movie.runtime / 60)}h {movie.runtime % 60}m
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm">
+                  <Clock size={14} strokeWidth={2.25} className="text-white/60" />
+                  <span className="text-white/70 text-sm">{Math.floor(movie.runtime / 60)}h {movie.runtime % 60}m</span>
                 </span>
               )}
-              <span className="text-white/60 text-sm uppercase">
+              <span className="px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm text-white/60 text-sm uppercase font-medium">
                 {movie.original_language}
               </span>
             </motion.div>
@@ -195,7 +195,7 @@ export default function MoviePage() {
               {movie.genres.map((genre, index) => (
                 <motion.span
                   key={genre.id}
-                  className="px-3 py-1 bg-white/10 rounded-full text-sm text-white/80 border border-white/10"
+                  className="px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-sm text-white/70 font-medium hover:bg-white/[0.08] hover:border-white/[0.15] transition-all duration-300"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.7 + index * 0.05 }}
@@ -217,33 +217,38 @@ export default function MoviePage() {
 
             {/* Action buttons */}
             <motion.div
-              className="flex flex-wrap items-center gap-4"
+              className="flex flex-wrap items-center gap-3"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9 }}
             >
               <motion.button
                 onClick={handleWatch}
-                className="flex items-center gap-3 bg-primary hover:bg-primary-dark text-white px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-primary/30"
+                className="group relative inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-gradient-to-r from-primary to-primary-dark text-white font-semibold text-sm overflow-hidden shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Play size={24} fill="white" />
-                {showPlayer ? 'Hide Player' : 'Watch Now'}
+                <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                <Play size={18} fill="white" strokeWidth={2.5} className="relative z-10" />
+                <span className="relative z-10">{showPlayer ? 'Hide Player' : 'Watch Now'}</span>
               </motion.button>
 
               <motion.button
                 onClick={handleWatchlistToggle}
-                className={`flex items-center gap-2 px-6 py-4 rounded-xl font-semibold transition-all ${
+                className={`group inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full font-semibold text-sm transition-all duration-300 ${
                   inWatchlist
-                    ? 'bg-primary/20 text-primary border border-primary/50'
-                    : 'bg-white/10 text-white hover:bg-white/20'
+                    ? 'bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20'
+                    : 'bg-white/[0.06] border border-white/[0.1] text-white hover:bg-white/[0.1] hover:border-white/[0.2]'
                 }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {inWatchlist ? <BookmarkCheck size={20} /> : <BookmarkPlus size={20} />}
-                {inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
+                {inWatchlist ? (
+                  <BookmarkCheck size={18} strokeWidth={2.5} />
+                ) : (
+                  <BookmarkPlus size={18} strokeWidth={2.5} />
+                )}
+                <span>{inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}</span>
               </motion.button>
 
               {movie.imdb_id && (
@@ -251,11 +256,11 @@ export default function MoviePage() {
                   href={`https://www.imdb.com/title/${movie.imdb_id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-white/50 hover:text-gold transition-colors"
+                  className="group inline-flex items-center gap-2 px-4 py-3.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-white/60 hover:text-gold hover:bg-white/[0.08] hover:border-white/[0.15] transition-all duration-300"
                   whileHover={{ scale: 1.05 }}
                 >
-                  <ExternalLink size={16} />
-                  IMDB
+                  <ExternalLink size={16} strokeWidth={2.25} />
+                  <span className="text-sm font-medium">IMDB</span>
                 </motion.a>
               )}
             </motion.div>
@@ -272,7 +277,7 @@ export default function MoviePage() {
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.4 }}
             >
-              <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl border border-white/10">
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/[0.1]">
                 <iframe
                   src={embedUrl}
                   width="100%"
@@ -284,7 +289,7 @@ export default function MoviePage() {
                   title={movie.title}
                 />
               </div>
-              <p className="text-white/40 text-xs mt-2 text-center">
+              <p className="text-white/40 text-xs mt-3 text-center font-medium">
                 Powered by VidAPI • If the player doesn't load, try refreshing
               </p>
             </motion.div>
@@ -300,27 +305,29 @@ export default function MoviePage() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-2xl font-bold text-white mb-6" style={{ fontFamily: "'Outfit', sans-serif" }}>
+            <h2 className="text-xl font-bold text-white mb-6" style={{ fontFamily: "'Outfit', sans-serif" }}>
               Cast
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {cast.map((person, index) => (
                 <motion.div
                   key={person.id}
-                  className="text-center"
+                  className="text-center group"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <img
-                    src={getImageUrl(person.profile_path, 'w185')}
-                    alt={person.name}
-                    className="w-20 h-20 rounded-full mx-auto mb-2 object-cover border-2 border-white/10"
-                    loading="lazy"
-                  />
-                  <p className="text-sm font-medium text-white truncate">{person.name}</p>
-                  <p className="text-xs text-white/50 truncate">{person.character}</p>
+                  <div className="relative w-20 h-20 mx-auto mb-2">
+                    <img
+                      src={getImageUrl(person.profile_path, 'w185')}
+                      alt={person.name}
+                      className="w-full h-full rounded-full object-cover ring-2 ring-white/[0.08] group-hover:ring-primary/30 transition-all duration-300"
+                      loading="lazy"
+                    />
+                  </div>
+                  <p className="text-sm font-semibold text-white truncate group-hover:text-primary transition-colors">{person.name}</p>
+                  <p className="text-xs text-white/50 truncate mt-0.5">{person.character}</p>
                 </motion.div>
               ))}
             </div>

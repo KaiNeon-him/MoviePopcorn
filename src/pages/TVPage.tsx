@@ -122,10 +122,10 @@ export default function TVPage() {
         >
           <Link
             to="/"
-            className="absolute top-20 left-4 sm:left-8 flex items-center gap-2 text-white/70 hover:text-white transition-colors bg-black/30 backdrop-blur-sm px-3 py-2 rounded-lg"
+            className="absolute top-20 left-4 sm:left-8 group inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/[0.06] border border-white/[0.1] backdrop-blur-xl hover:bg-white/[0.1] hover:border-white/[0.2] transition-all duration-300"
           >
-            <ArrowLeft size={18} />
-            <span className="text-sm">Back</span>
+            <ArrowLeft size={16} strokeWidth={2.5} className="text-white/70 group-hover:text-white transition-colors" />
+            <span className="text-sm font-medium text-white/70 group-hover:text-white transition-colors">Back</span>
           </Link>
         </motion.div>
       </motion.div>
@@ -143,7 +143,7 @@ export default function TVPage() {
             <img
               src={getImageUrl(show.poster_path, 'w500')}
               alt={show.name || ''}
-              className="w-48 sm:w-64 rounded-xl shadow-2xl mx-auto md:mx-0"
+              className="w-48 sm:w-64 rounded-2xl shadow-2xl shadow-black/50 ring-1 ring-white/[0.1] mx-auto md:mx-0"
             />
           </motion.div>
 
@@ -172,28 +172,28 @@ export default function TVPage() {
             )}
 
             <motion.div
-              className="flex flex-wrap items-center gap-4 mb-6"
+              className="flex flex-wrap items-center gap-3 mb-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
             >
-              <span className="flex items-center gap-1 text-gold">
-                <Star size={18} fill="currentColor" />
-                <span className="font-bold">{show.vote_average.toFixed(1)}</span>
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm">
+                <Star size={14} className="text-gold" fill="currentColor" strokeWidth={2.5} />
+                <span className="font-bold text-white text-sm">{show.vote_average.toFixed(1)}</span>
               </span>
               {show.first_air_date && (
-                <span className="flex items-center gap-1 text-white/60">
-                  <Calendar size={16} />
-                  {new Date(show.first_air_date).getFullYear()}
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm">
+                  <Calendar size={14} strokeWidth={2.25} className="text-white/60" />
+                  <span className="text-white/70 text-sm">{new Date(show.first_air_date).getFullYear()}</span>
                 </span>
               )}
               {show.number_of_seasons && (
-                <span className="text-white/60">
+                <span className="px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm text-white/70 text-sm">
                   {show.number_of_seasons} Season{show.number_of_seasons > 1 ? 's' : ''}
                 </span>
               )}
               {show.number_of_episodes && (
-                <span className="text-white/60">
+                <span className="px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm text-white/70 text-sm">
                   {show.number_of_episodes} Episodes
                 </span>
               )}
@@ -209,7 +209,7 @@ export default function TVPage() {
               {show.genres.map((genre, index) => (
                 <motion.span
                   key={genre.id}
-                  className="px-3 py-1 bg-white/10 rounded-full text-sm text-white/80 border border-white/10"
+                  className="px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-sm text-white/70 font-medium hover:bg-white/[0.08] hover:border-white/[0.15] transition-all duration-300"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.7 + index * 0.05 }}
@@ -232,10 +232,10 @@ export default function TVPage() {
             {/* Watchlist button */}
             <motion.button
               onClick={handleWatchlistToggle}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
+              className={`group inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full font-semibold text-sm transition-all duration-300 ${
                 inWatchlist
-                  ? 'bg-primary/20 text-primary border border-primary/50'
-                  : 'bg-white/10 text-white hover:bg-white/20'
+                  ? 'bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20'
+                  : 'bg-white/[0.06] border border-white/[0.1] text-white hover:bg-white/[0.1] hover:border-white/[0.2]'
               }`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -243,8 +243,12 @@ export default function TVPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9 }}
             >
-              {inWatchlist ? <BookmarkCheck size={20} /> : <BookmarkPlus size={20} />}
-              {inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
+              {inWatchlist ? (
+                <BookmarkCheck size={18} strokeWidth={2.5} />
+              ) : (
+                <BookmarkPlus size={18} strokeWidth={2.5} />
+              )}
+              <span>{inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}</span>
             </motion.button>
           </motion.div>
         </div>
@@ -260,12 +264,12 @@ export default function TVPage() {
               transition={{ duration: 0.4 }}
             >
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-white/60 text-sm">
+                <span className="px-2.5 py-1 rounded-md bg-primary/20 border border-primary/30 text-primary text-xs font-bold">
                   S{selectedEpisode.season_number} E{selectedEpisode.episode_number}
                 </span>
-                <span className="text-white font-medium">{selectedEpisode.name}</span>
+                <span className="text-white font-semibold">{selectedEpisode.name}</span>
               </div>
-              <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl border border-white/10">
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/[0.1]">
                 <iframe
                   src={embedUrl}
                   width="100%"
@@ -277,7 +281,7 @@ export default function TVPage() {
                   title={`${show.name} S${selectedEpisode.season_number}E${selectedEpisode.episode_number}`}
                 />
               </div>
-              <p className="text-white/40 text-xs mt-2 text-center">
+              <p className="text-white/40 text-xs mt-3 text-center font-medium">
                 Powered by VidAPI • If the player doesn't load, try refreshing
               </p>
             </motion.div>
@@ -293,7 +297,7 @@ export default function TVPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-2xl font-bold text-white mb-6" style={{ fontFamily: "'Outfit', sans-serif" }}>
+            <h2 className="text-xl font-bold text-white mb-6" style={{ fontFamily: "'Outfit', sans-serif" }}>
               Episodes
             </h2>
 
@@ -305,10 +309,10 @@ export default function TVPage() {
                   <motion.button
                     key={season.id}
                     onClick={() => setSelectedSeason(season.season_number)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${
                       selectedSeason === season.season_number
-                        ? 'bg-primary text-white'
-                        : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
+                        ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-lg shadow-primary/30'
+                        : 'bg-white/[0.06] border border-white/[0.08] text-white/60 hover:bg-white/[0.1] hover:text-white'
                     }`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -323,10 +327,10 @@ export default function TVPage() {
               {episodes.map((episode, index) => (
                 <motion.div
                   key={episode.id}
-                  className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all ${
+                  className={`group flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-300 ${
                     selectedEpisode?.id === episode.id
-                      ? 'bg-primary/20 border border-primary/50'
-                      : 'bg-white/5 hover:bg-white/10 border border-transparent'
+                      ? 'bg-primary/10 border border-primary/30 shadow-lg shadow-primary/10'
+                      : 'bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] hover:border-white/[0.12]'
                   }`}
                   onClick={() => handleEpisodeClick(episode)}
                   initial={{ opacity: 0, x: -20 }}
@@ -336,7 +340,7 @@ export default function TVPage() {
                   whileHover={{ x: 5 }}
                 >
                   {/* Episode thumbnail */}
-                  <div className="flex-shrink-0 w-32 sm:w-40 aspect-video rounded-lg overflow-hidden relative">
+                  <div className="flex-shrink-0 w-32 sm:w-40 aspect-video rounded-xl overflow-hidden relative ring-1 ring-white/[0.08]">
                     {episode.still_path ? (
                       <img
                         src={getImageUrl(episode.still_path, 'w300')}
@@ -346,12 +350,15 @@ export default function TVPage() {
                       />
                     ) : (
                       <div className="w-full h-full bg-dark-surface flex items-center justify-center">
-                        <Play size={24} className="text-white/30" />
+                        <Play size={24} className="text-white/30" strokeWidth={2.25} />
                       </div>
                     )}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/40">
-                      <div className="w-10 h-10 rounded-full bg-primary/90 flex items-center justify-center">
-                        <Play size={16} className="text-white ml-0.5" fill="white" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/50">
+                      <div className="relative">
+                        <div className="absolute inset-0 rounded-full bg-primary/40 blur-xl scale-150" />
+                        <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg shadow-primary/40 ring-2 ring-white/20">
+                          <Play size={16} className="text-white ml-0.5" fill="white" strokeWidth={2.5} />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -359,29 +366,29 @@ export default function TVPage() {
                   {/* Episode info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-primary font-bold text-sm">
+                      <span className="px-2 py-0.5 rounded-md bg-primary/20 border border-primary/30 text-primary text-xs font-bold">
                         E{episode.episode_number}
                       </span>
-                      <h4 className="text-white font-medium truncate">{episode.name}</h4>
+                      <h4 className="text-white font-semibold truncate">{episode.name}</h4>
                     </div>
                     <p className="text-white/50 text-sm line-clamp-2">{episode.overview}</p>
-                    <div className="flex items-center gap-3 mt-1">
+                    <div className="flex items-center gap-3 mt-2">
                       {episode.runtime && (
-                        <span className="text-white/40 text-xs flex items-center gap-1">
-                          <Clock size={12} />
-                          {episode.runtime}m
+                        <span className="flex items-center gap-1 text-white/40 text-xs">
+                          <Clock size={12} strokeWidth={2.5} />
+                          <span>{episode.runtime}m</span>
                         </span>
                       )}
                       {episode.vote_average > 0 && (
-                        <span className="text-white/40 text-xs flex items-center gap-1">
-                          <Star size={12} className="text-gold" fill="currentColor" />
-                          {episode.vote_average.toFixed(1)}
+                        <span className="flex items-center gap-1 text-white/40 text-xs">
+                          <Star size={12} className="text-gold" fill="currentColor" strokeWidth={2.5} />
+                          <span>{episode.vote_average.toFixed(1)}</span>
                         </span>
                       )}
                     </div>
                   </div>
 
-                  <ChevronRight size={20} className="text-white/30 flex-shrink-0" />
+                  <ChevronRight size={20} strokeWidth={2.5} className="text-white/30 group-hover:text-white/60 transition-colors flex-shrink-0" />
                 </motion.div>
               ))}
             </div>
@@ -397,27 +404,29 @@ export default function TVPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-2xl font-bold text-white mb-6" style={{ fontFamily: "'Outfit', sans-serif" }}>
+            <h2 className="text-xl font-bold text-white mb-6" style={{ fontFamily: "'Outfit', sans-serif" }}>
               Cast
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {cast.map((person, index) => (
                 <motion.div
                   key={person.id}
-                  className="text-center"
+                  className="text-center group"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <img
-                    src={getImageUrl(person.profile_path, 'w185')}
-                    alt={person.name}
-                    className="w-20 h-20 rounded-full mx-auto mb-2 object-cover border-2 border-white/10"
-                    loading="lazy"
-                  />
-                  <p className="text-sm font-medium text-white truncate">{person.name}</p>
-                  <p className="text-xs text-white/50 truncate">{person.character}</p>
+                  <div className="relative w-20 h-20 mx-auto mb-2">
+                    <img
+                      src={getImageUrl(person.profile_path, 'w185')}
+                      alt={person.name}
+                      className="w-full h-full rounded-full object-cover ring-2 ring-white/[0.08] group-hover:ring-primary/30 transition-all duration-300"
+                      loading="lazy"
+                    />
+                  </div>
+                  <p className="text-sm font-semibold text-white truncate group-hover:text-primary transition-colors">{person.name}</p>
+                  <p className="text-xs text-white/50 truncate mt-0.5">{person.character}</p>
                 </motion.div>
               ))}
             </div>

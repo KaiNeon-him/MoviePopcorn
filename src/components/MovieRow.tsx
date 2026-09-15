@@ -32,48 +32,52 @@ export default function MovieRow({ title, movies, mediaType, icon }: MovieRowPro
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-100px' }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
     >
       <motion.div
-        className="flex items-center gap-3 mb-4 px-4 sm:px-8 lg:px-12"
+        className="flex items-center gap-3 mb-5 px-4 sm:px-8 lg:px-12"
         initial={{ opacity: 0, x: -20 }}
         whileInView={{ opacity: 1, x: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.4 }}
       >
-        {icon && <span className="text-2xl">{icon}</span>}
+        {icon && <span className="text-xl">{icon}</span>}
         <h2
-          className="text-xl sm:text-2xl font-bold text-white"
+          className="text-lg sm:text-xl font-bold text-white tracking-tight"
           style={{ fontFamily: "'Outfit', sans-serif" }}
         >
           {title}
         </h2>
         <motion.div
-          className="h-0.5 flex-1 max-w-20 bg-gradient-to-r from-primary/50 to-transparent rounded-full"
+          className="h-px flex-1 max-w-24 bg-gradient-to-r from-white/20 to-transparent rounded-full"
           initial={{ width: 0 }}
-          whileInView={{ width: 80 }}
+          whileInView={{ width: 96 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3, duration: 0.5 }}
         />
       </motion.div>
 
       <div className="relative">
-        {/* Scroll buttons */}
+        {/* Scroll buttons - modern glass style */}
         <motion.button
           onClick={() => scroll('left')}
-          className="absolute left-0 top-0 bottom-0 z-10 w-12 bg-gradient-to-r from-dark/90 to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity flex items-center justify-center"
+          className="absolute left-2 top-0 bottom-0 z-10 w-14 bg-gradient-to-r from-dark to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-300 flex items-center justify-start pl-2"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
-          <ChevronLeft size={32} className="text-white" />
+          <div className="p-2.5 rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/[0.1] hover:bg-white/[0.15] hover:border-white/[0.2] transition-all shadow-lg">
+            <ChevronLeft size={18} strokeWidth={2.5} className="text-white" />
+          </div>
         </motion.button>
         <motion.button
           onClick={() => scroll('right')}
-          className="absolute right-0 top-0 bottom-0 z-10 w-12 bg-gradient-to-l from-dark/90 to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity flex items-center justify-center"
+          className="absolute right-2 top-0 bottom-0 z-10 w-14 bg-gradient-to-l from-dark to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-300 flex items-center justify-end pr-2"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
-          <ChevronRight size={32} className="text-white" />
+          <div className="p-2.5 rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/[0.1] hover:bg-white/[0.15] hover:border-white/[0.2] transition-all shadow-lg">
+            <ChevronRight size={18} strokeWidth={2.5} className="text-white" />
+          </div>
         </motion.button>
 
         {/* Scrollable container */}

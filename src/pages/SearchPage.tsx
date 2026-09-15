@@ -40,7 +40,7 @@ export default function SearchPage() {
         </motion.h1>
         {searched && !loading && (
           <motion.p
-            className="text-white/50 mb-8"
+            className="text-white/50 mb-8 text-sm font-medium"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
@@ -52,7 +52,7 @@ export default function SearchPage() {
         {loading && (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="aspect-[2/3] shimmer rounded-xl" />
+              <div key={i} className="aspect-[2/3] shimmer rounded-2xl" />
             ))}
           </div>
         )}
@@ -79,9 +79,11 @@ export default function SearchPage() {
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              <SearchIcon size={64} className="text-white/20 mb-4" />
+              <div className="p-6 rounded-3xl bg-white/[0.03] border border-white/[0.06] mb-4">
+                <SearchIcon size={64} strokeWidth={1.5} className="text-white/10" />
+              </div>
             </motion.div>
-            <p className="text-white/50 text-xl">No results found</p>
+            <p className="text-white/50 text-xl font-medium">No results found</p>
             <p className="text-white/30 text-sm mt-2">Try a different search term</p>
           </motion.div>
         )}
@@ -96,9 +98,11 @@ export default function SearchPage() {
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              <SearchIcon size={64} className="text-white/20 mb-4" />
+              <div className="p-6 rounded-3xl bg-white/[0.03] border border-white/[0.06] mb-4">
+                <SearchIcon size={64} strokeWidth={1.5} className="text-white/10" />
+              </div>
             </motion.div>
-            <p className="text-white/50 text-xl">Search for movies & TV shows</p>
+            <p className="text-white/50 text-xl font-medium">Search for movies & TV shows</p>
             <p className="text-white/30 text-sm mt-2">Use the search bar above to find content</p>
           </motion.div>
         )}

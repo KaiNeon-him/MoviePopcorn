@@ -15,7 +15,9 @@ export default function WatchlistPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <Bookmark size={32} className="text-primary" />
+          <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20">
+            <Bookmark size={28} strokeWidth={2.25} className="text-primary" />
+          </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-white" style={{ fontFamily: "'Outfit', sans-serif" }}>
             My Watchlist
           </h1>
@@ -32,15 +34,18 @@ export default function WatchlistPage() {
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              <Bookmark size={80} className="text-white/10 mb-4" />
+              <div className="p-6 rounded-3xl bg-white/[0.03] border border-white/[0.06] mb-4">
+                <Bookmark size={64} strokeWidth={1.5} className="text-white/10" />
+              </div>
             </motion.div>
-            <p className="text-white/50 text-xl mb-2">Your watchlist is empty</p>
-            <p className="text-white/30 text-sm">Add movies and TV shows to watch later</p>
+            <p className="text-white/50 text-xl mb-2 font-medium">Your watchlist is empty</p>
+            <p className="text-white/30 text-sm mb-6">Add movies and TV shows to watch later</p>
             <Link
               to="/"
-              className="mt-6 px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-lg font-semibold transition-colors"
+              className="group relative inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-primary to-primary-dark text-white font-semibold text-sm overflow-hidden shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300"
             >
-              Browse Content
+              <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+              <span className="relative z-10">Browse Content</span>
             </Link>
           </motion.div>
         ) : (
@@ -60,29 +65,35 @@ export default function WatchlistPage() {
                 <div className="relative group">
                   <Link
                     to={item.media_type === 'tv' ? `/tv/${item.id}` : `/movie/${item.id}`}
-                    className="block rounded-xl overflow-hidden bg-dark-card card-hover"
+                    className="block rounded-2xl overflow-hidden bg-dark-card ring-1 ring-white/[0.06] hover:ring-white/[0.12] shadow-lg shadow-black/20 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500"
                   >
                     <div className="aspect-[2/3] relative overflow-hidden">
-                      <img
+                      <motion.img
                         src={getImageUrl(item.poster_path, 'w500')}
                         alt={item.title}
                         className="w-full h-full object-cover"
                         loading="lazy"
+                        whileHover={{ scale: 1.08 }}
+                        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
-                    <div className="p-3">
-                      <h3 className="text-sm font-semibold text-white truncate">{item.title}</h3>
-                      <p className="text-xs text-white/50 mt-1 uppercase">{item.media_type}</p>
+                    <div className="p-3.5">
+                      <h3 className="text-[13px] font-semibold text-white truncate group-hover:text-primary transition-colors duration-300 leading-tight">
+                        {item.title}
+                      </h3>
+                      <p className="text-[11px] text-white/40 mt-1.5 uppercase font-medium tracking-wide">
+                        {item.media_type}
+                      </p>
                     </div>
                   </Link>
                   <motion.button
                     onClick={() => removeFromWatchlist(item.id, item.media_type)}
-                    className="absolute top-2 right-2 p-2 rounded-full bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                    whileHover={{ scale: 1.2 }}
+                    className="absolute top-3 right-3 p-2 rounded-full bg-black/60 backdrop-blur-md border border-white/[0.1] opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-500/20 hover:border-red-500/30"
+                    whileHover={{ scale: 1.15 }}
                     whileTap={{ scale: 0.9 }}
                   >
-                    <Trash2 size={14} className="text-red-400" />
+                    <Trash2 size={14} strokeWidth={2.5} className="text-red-400" />
                   </motion.button>
                 </div>
               </motion.div>

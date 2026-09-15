@@ -34,7 +34,7 @@ export default function TrendingPage() {
           🔥 Trending
         </motion.h1>
 
-        {/* Time window tabs */}
+        {/* Time window tabs - modern pill style */}
         <div className="flex gap-2 mb-8">
           {[
             { key: 'day' as TimeWindow, label: 'Today' },
@@ -43,10 +43,10 @@ export default function TrendingPage() {
             <motion.button
               key={option.key}
               onClick={() => setTimeWindow(option.key)}
-              className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              className={`relative px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 overflow-hidden ${
                 timeWindow === option.key
-                  ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                  : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
+                  ? 'text-white shadow-lg shadow-primary/30'
+                  : 'bg-white/[0.06] border border-white/[0.08] text-white/60 hover:bg-white/[0.1] hover:text-white'
               }`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -54,7 +54,14 @@ export default function TrendingPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              {option.label}
+              {timeWindow === option.key && (
+                <motion.span
+                  className="absolute inset-0 bg-gradient-to-r from-primary to-primary-dark"
+                  layoutId="trending-bg"
+                  transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                />
+              )}
+              <span className="relative z-10">{option.label}</span>
             </motion.button>
           ))}
         </div>
@@ -63,7 +70,7 @@ export default function TrendingPage() {
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             {Array.from({ length: 18 }).map((_, i) => (
-              <div key={i} className="aspect-[2/3] shimmer rounded-xl" />
+              <div key={i} className="aspect-[2/3] shimmer rounded-2xl" />
             ))}
           </div>
         ) : (

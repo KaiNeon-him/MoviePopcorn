@@ -47,16 +47,16 @@ export default function MoviesPage() {
           🎬 Movies
         </motion.h1>
 
-        {/* Category tabs */}
+        {/* Category tabs - modern pill style */}
         <div className="flex gap-2 overflow-x-auto hide-scrollbar mb-8 pb-2">
           {CATEGORIES.map((cat, index) => (
             <motion.button
               key={cat.key}
               onClick={() => setCategory(cat.key)}
-              className={`px-5 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+              className={`relative px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 overflow-hidden ${
                 category === cat.key
-                  ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                  : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
+                  ? 'text-white shadow-lg shadow-primary/30'
+                  : 'bg-white/[0.06] border border-white/[0.08] text-white/60 hover:bg-white/[0.1] hover:text-white'
               }`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -64,7 +64,17 @@ export default function MoviesPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              {cat.emoji} {cat.label}
+              {category === cat.key && (
+                <motion.span
+                  className="absolute inset-0 bg-gradient-to-r from-primary to-primary-dark"
+                  layoutId="category-bg"
+                  transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-2">
+                <span>{cat.emoji}</span>
+                <span>{cat.label}</span>
+              </span>
             </motion.button>
           ))}
         </div>
@@ -73,7 +83,7 @@ export default function MoviesPage() {
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             {Array.from({ length: 18 }).map((_, i) => (
-              <div key={i} className="aspect-[2/3] shimmer rounded-xl" />
+              <div key={i} className="aspect-[2/3] shimmer rounded-2xl" />
             ))}
           </div>
         ) : (

@@ -63,23 +63,27 @@ export default function Hero() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
             <motion.div
-              className="flex items-center gap-2 mb-3"
+              className="flex items-center gap-3 mb-4"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <span className="bg-primary px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wide animate-pulse-glow">
-                🔥 Trending
+              <span className="relative inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-primary/20 to-primary/10 border border-primary/30 backdrop-blur-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                </span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-white">Trending</span>
               </span>
-              <span className="flex items-center gap-1 text-gold text-sm">
-                <Star size={14} fill="currentColor" />
-                {movie.vote_average.toFixed(1)}
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm">
+                <Star size={13} className="text-gold" fill="currentColor" strokeWidth={2.5} />
+                <span className="text-sm font-semibold text-white">{movie.vote_average.toFixed(1)}</span>
               </span>
               {movie.release_date && (
-                <span className="text-white/60 text-sm">
+                <span className="text-white/50 text-sm font-medium">
                   {new Date(movie.release_date).getFullYear()}
                 </span>
               )}
@@ -96,7 +100,7 @@ export default function Hero() {
             </motion.h1>
 
             <motion.p
-              className="text-white/70 text-sm sm:text-base line-clamp-3 mb-6 max-w-lg"
+              className="text-white/70 text-sm sm:text-base line-clamp-3 mb-6 max-w-lg leading-relaxed"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
@@ -105,7 +109,7 @@ export default function Hero() {
             </motion.p>
 
             <motion.div
-              className="flex items-center gap-4"
+              className="flex items-center gap-3"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
@@ -113,19 +117,20 @@ export default function Hero() {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link
                   to={`/movie/${movie.id}`}
-                  className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg shadow-primary/30"
+                  className="group relative inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-gradient-to-r from-primary to-primary-dark text-white font-semibold text-sm overflow-hidden shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300"
                 >
-                  <Play size={20} fill="white" />
-                  Watch Now
+                  <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                  <Play size={18} fill="white" strokeWidth={2.5} className="relative z-10" />
+                  <span className="relative z-10">Watch Now</span>
                 </Link>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link
                   to={`/movie/${movie.id}`}
-                  className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg font-semibold transition-colors backdrop-blur-sm glass"
+                  className="group inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-white/[0.06] border border-white/[0.12] backdrop-blur-xl text-white font-semibold text-sm hover:bg-white/[0.1] hover:border-white/[0.2] transition-all duration-300"
                 >
-                  <Info size={20} />
-                  More Info
+                  <Info size={18} strokeWidth={2.25} className="text-white/80 group-hover:text-white transition-colors" />
+                  <span>More Info</span>
                 </Link>
               </motion.div>
             </motion.div>
@@ -144,11 +149,11 @@ export default function Hero() {
           <motion.button
             key={index}
             onClick={() => setCurrentIndex(index)}
-            className={`h-3 rounded-full transition-all ${
-              index === currentIndex ? 'bg-primary' : 'bg-white/40 hover:bg-white/60'
+            className={`h-1.5 rounded-full transition-all ${
+              index === currentIndex ? 'bg-gradient-to-r from-primary to-gold' : 'bg-white/30 hover:bg-white/50'
             }`}
             animate={{
-              width: index === currentIndex ? 32 : 12,
+              width: index === currentIndex ? 32 : 6,
             }}
             whileHover={{ scale: 1.2 }}
             transition={{ type: 'spring', stiffness: 300 }}
@@ -161,7 +166,7 @@ export default function Hero() {
         {[...Array(5)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 bg-primary/20 rounded-full"
+            className="absolute w-1.5 h-1.5 bg-primary/30 rounded-full blur-sm"
             style={{
               left: `${20 + i * 15}%`,
               top: `${30 + (i % 3) * 20}%`,
