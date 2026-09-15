@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, Clock, Calendar, Play, ArrowLeft, ChevronRight, BookmarkPlus, BookmarkCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MovieDetails, CastMember, Episode, fetchTVDetails, fetchTVCredits, fetchSeasonEpisodes, getImageUrl, getVidApiTVUrl } from '../api/tmdb';
 import { useWatchHistory } from '../hooks/useWatchHistory';
 import { useWatchlist } from '../hooks/useWatchlist';
+import { useStillWatching } from '../hooks/useStillWatching';
+import StillWatchingModal from '../components/StillWatchingModal';
 
 export default function TVPage() {
   const { id } = useParams<{ id: string }>();
@@ -15,8 +17,27 @@ export default function TVPage() {
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [selectedEpisode, setSelectedEpisode] = useState<Episode | null>(null);
   const [showPlayer, setShowPlayer] = useState(false);
+  const [showStillWatching, setShowStillWatching] = useState(false);
   const { addToHistory } = useWatchHistory();
   const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
+
+  const handleStillWatchingTimeout = useCallback(() => {
+    setShowStillWatching(true);
+  }, []);
+
+  useStillWatching({
+    isPlaying: showPlayer && !showStillWatching,
+    onTimeout: handleStillWatchingTimeout,
+  });
+
+  const handleContinueWatching = () => {
+    setShowStillWatching(false);
+  };
+
+  const handleStopWatching = () => {
+    setShowStillWatching(false);
+    setShowPlayer(false);
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -287,6 +308,14 @@ export default function TVPage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Still Watching Modal */}
+        <StillWatchingModal
+          isOpen={showStillWatching}
+          onContinue={handleContinueWatching}
+          onStop={handleStopWatching}
+          title={selectedEpisode ? `Still watching ${show.name}?` : "Are you still watching?"}
+        />
 
         {/* Season & Episode Selector */}
         {show.seasons && show.seasons.length > 0 && (

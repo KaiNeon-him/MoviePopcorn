@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, Clock, Calendar, Play, ExternalLink, ArrowLeft, BookmarkPlus, BookmarkCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MovieDetails, CastMember, fetchMovieDetails, fetchMovieCredits, getImageUrl, getVidApiMovieUrl } from '../api/tmdb';
 import { useWatchHistory } from '../hooks/useWatchHistory';
 import { useWatchlist } from '../hooks/useWatchlist';
+import { useStillWatching } from '../hooks/useStillWatching';
+import StillWatchingModal from '../components/StillWatchingModal';
 
 export default function MoviePage() {
   const { id } = useParams<{ id: string }>();
@@ -12,8 +14,27 @@ export default function MoviePage() {
   const [cast, setCast] = useState<CastMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [showPlayer, setShowPlayer] = useState(false);
+  const [showStillWatching, setShowStillWatching] = useState(false);
   const { addToHistory } = useWatchHistory();
   const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
+
+  const handleStillWatchingTimeout = useCallback(() => {
+    setShowStillWatching(true);
+  }, []);
+
+  useStillWatching({
+    isPlaying: showPlayer && !showStillWatching,
+    onTimeout: handleStillWatchingTimeout,
+  });
+
+  const handleContinueWatching = () => {
+    setShowStillWatching(false);
+  };
+
+  const handleStopWatching = () => {
+    setShowStillWatching(false);
+    setShowPlayer(false);
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -295,6 +316,14 @@ export default function MoviePage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Still Watching Modal */}
+        <StillWatchingModal
+          isOpen={showStillWatching}
+          onContinue={handleContinueWatching}
+          onStop={handleStopWatching}
+          title={`Still watching ${movie.title}?`}
+        />
 
         {/* Cast */}
         {cast.length > 0 && (

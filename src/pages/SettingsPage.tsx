@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { 
   Moon, Sun, Globe, Bell, Shield, Film, Volume2, 
   Monitor, Smartphone, Wifi, Check, Save, Play, 
-  User, Lock, Download, RotateCcw, Trash2
+  User, Lock, Download, RotateCcw, Trash2, Clock
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -242,6 +242,84 @@ export default function SettingsPage() {
                 <span className="text-sm text-white/70 w-10 text-right">{settings.volume}%</span>
               </div>
             </div>
+
+            {/* Still Watching */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Monitor size={20} strokeWidth={2} className="text-white/60" />
+                <div>
+                  <p className="text-sm font-medium text-white">Are You Still Watching?</p>
+                  <p className="text-xs text-white/40">Prompt after inactivity during playback</p>
+                </div>
+              </div>
+              <ToggleSwitch 
+                enabled={settings.stillWatching} 
+                onChange={(value) => {
+                  updateSettings({ stillWatching: value });
+                  info('Still Watching Updated', value ? 'Inactivity detection enabled' : 'Inactivity detection disabled');
+                }}
+              />
+            </div>
+
+            {/* Inactivity Timeout */}
+            {settings.stillWatching && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <Clock size={20} strokeWidth={2} className="text-white/60" />
+                  <div>
+                    <p className="text-sm font-medium text-white">Inactivity Timeout</p>
+                    <p className="text-xs text-white/40">Minutes before showing prompt</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min="5"
+                    max="30"
+                    step="5"
+                    value={settings.inactivityTimeout}
+                    onChange={(e) => updateSettings({ inactivityTimeout: Number(e.target.value) })}
+                    className="w-32 h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
+                  />
+                  <span className="text-sm text-white/70 w-16 text-right">{settings.inactivityTimeout} min</span>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Auto-pause Countdown */}
+            {settings.stillWatching && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <Clock size={20} strokeWidth={2} className="text-white/60" />
+                  <div>
+                    <p className="text-sm font-medium text-white">Auto-pause Countdown</p>
+                    <p className="text-xs text-white/40">Seconds to respond before pausing</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min="15"
+                    max="60"
+                    step="5"
+                    value={settings.autoPauseCountdown}
+                    onChange={(e) => updateSettings({ autoPauseCountdown: Number(e.target.value) })}
+                    className="w-32 h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
+                  />
+                  <span className="text-sm text-white/70 w-12 text-right">{settings.autoPauseCountdown}s</span>
+                </div>
+              </motion.div>
+            )}
           </div>
         </motion.div>
 

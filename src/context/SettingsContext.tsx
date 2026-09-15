@@ -5,6 +5,9 @@ export interface AppSettings {
   autoplay: boolean;
   autoplayNext: boolean;
   videoQuality: 'auto' | 'low' | 'medium' | 'high';
+  stillWatching: boolean;
+  inactivityTimeout: number;
+  autoPauseCountdown: number;
   
   // Audio & Subtitles
   subtitles: boolean;
@@ -46,6 +49,9 @@ const DEFAULT_SETTINGS: AppSettings = {
   autoplay: true,
   autoplayNext: true,
   videoQuality: 'high',
+  stillWatching: true,
+  inactivityTimeout: 10,
+  autoPauseCountdown: 30,
   subtitles: false,
   subtitleLanguage: 'en',
   audioLanguage: 'en',
