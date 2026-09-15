@@ -9,6 +9,7 @@ import Footer from './components/Footer';
 import SplashScreen from './components/SplashScreen';
 import AdBlockerDetector from './components/AdBlockerDetector';
 import InstallPrompt from './components/InstallPrompt';
+import CookieConsent from './components/CookieConsent';
 import HomePage from './pages/HomePage';
 import MoviePage from './pages/MoviePage';
 import TVPage from './pages/TVPage';
@@ -21,6 +22,10 @@ import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
 import WatchHistoryPage from './pages/WatchHistoryPage';
 import SettingsPage from './pages/SettingsPage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
+import CookiePolicyPage from './pages/CookiePolicyPage';
+import DMCAPage from './pages/DMCAPage';
 
 function AppContent() {
   const location = useLocation();
@@ -44,11 +49,16 @@ function AppContent() {
           <Route path="/search" element={<SearchPage />} />
           <Route path="/login" element={<AuthPage />} />
           <Route path="/signup" element={<AuthPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/cookies" element={<CookiePolicyPage />} />
+          <Route path="/dmca" element={<DMCAPage />} />
         </Routes>
       </main>
       {!isAuthPage && <Footer />}
       <AdBlockerDetector />
       <InstallPrompt />
+      <CookieConsent />
     </div>
   );
 }

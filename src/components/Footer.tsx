@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Logo from './Logo';
+import { Cookie, Shield, FileText, Copyright, ExternalLink } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -69,6 +70,54 @@ export default function Footer() {
               <li><span className="text-white/40 text-sm">Movie data by TMDB</span></li>
               <li><span className="text-white/40 text-sm">Video streaming by VidAPI</span></li>
               <li><span className="text-white/40 text-sm">For educational purposes only</span></li>
+            </ul>
+          </motion.div>
+
+          {/* Legal */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.25 }}
+          >
+            <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider" style={{ fontFamily: "'Outfit', sans-serif" }}>Legal</h3>
+            <ul className="space-y-2.5">
+              <li>
+                <Link
+                  to="/terms"
+                  className="group inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-all duration-300"
+                >
+                  <FileText size={12} strokeWidth={2.5} />
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/privacy"
+                  className="group inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-all duration-300"
+                >
+                  <Shield size={12} strokeWidth={2.5} />
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/cookies"
+                  className="group inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-all duration-300"
+                >
+                  <Cookie size={12} strokeWidth={2.5} />
+                  Cookie Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/dmca"
+                  className="group inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-all duration-300"
+                >
+                  <Copyright size={12} strokeWidth={2.5} />
+                  DMCA Policy
+                </Link>
+              </li>
             </ul>
           </motion.div>
 
