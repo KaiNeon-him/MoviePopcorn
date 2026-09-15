@@ -10,7 +10,8 @@
 }
 
 /* Dark theme (default) */
-:root {
+:root,
+.dark {
   --bg-primary: #0a0a0a;
   --bg-secondary: #141414;
   --bg-tertiary: #1a1a2e;

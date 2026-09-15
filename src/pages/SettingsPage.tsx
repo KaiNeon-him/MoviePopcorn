@@ -8,7 +8,6 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
 interface Settings {
-  theme: 'dark' | 'light';
   autoplay: boolean;
   autoplayNext: boolean;
   videoQuality: 'auto' | 'low' | 'medium' | 'high';
@@ -31,7 +30,6 @@ interface Settings {
 }
 
 const DEFAULT_SETTINGS: Settings = {
-  theme: 'dark',
   autoplay: true,
   autoplayNext: true,
   videoQuality: 'high',
@@ -62,17 +60,15 @@ export default function SettingsPage() {
   const [showPinInput, setShowPinInput] = useState(false);
 
   useEffect(() => {
-    // Load settings from localStorage
+    // Load settings from localStorage (but not theme - that's managed by ThemeContext)
     const stored = localStorage.getItem('moviepopcorn_settings');
     if (stored) {
       const parsed = JSON.parse(stored);
-      setSettings(parsed);
-      // Sync theme from settings
-      if (parsed.theme) {
-        setTheme(parsed.theme);
-      }
+      // Remove theme from loaded settings to avoid conflicts
+      const { theme: _, ...rest } = parsed;
+      setSettings({ ...DEFAULT_SETTINGS, ...rest });
     }
-  }, [setTheme]);
+  }, []);
 
   const updateSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
     setSettings(prev => ({ ...prev, [key]: value }));
@@ -204,34 +200,34 @@ export default function SettingsPage() {
                 </div>
                 <div className="flex gap-2">
                   <motion.button
-                    onClick={() => {
-                      setTheme('dark');
-                      updateSetting('theme', 'dark');
-                    }}
+                    onClick={() => setTheme('dark')}
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                       theme === 'dark'
-                        ? 'bg-gradient-to-r from-primary to-primary-dark text-white'
-                        : 'bg-white/[0.04] border border-white/[0.08] text-white/60 hover:bg-white/[0.08]'
+                        ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-lg shadow-primary/30'
+                        : 'bg-white/[0.04] border border-white/[0.08] text-white/60 hover:bg-white/[0.08] hover:text-white'
                     }`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    Dark
+                    <span className="flex items-center gap-2">
+                      <Moon size={14} strokeWidth={2.5} />
+                      Dark
+                    </span>
                   </motion.button>
                   <motion.button
-                    onClick={() => {
-                      setTheme('light');
-                      updateSetting('theme', 'light');
-                    }}
+                    onClick={() => setTheme('light')}
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                       theme === 'light'
-                        ? 'bg-gradient-to-r from-primary to-primary-dark text-white'
-                        : 'bg-white/[0.04] border border-white/[0.08] text-white/60 hover:bg-white/[0.08]'
+                        ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-lg shadow-primary/30'
+                        : 'bg-white/[0.04] border border-white/[0.08] text-white/60 hover:bg-white/[0.08] hover:text-white'
                     }`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    Light
+                    <span className="flex items-center gap-2">
+                      <Sun size={14} strokeWidth={2.5} />
+                      Light
+                    </span>
                   </motion.button>
                 </div>
               </div>          </div>
