@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Menu, X, Bookmark, User } from 'lucide-react';
+import { Search, Menu, X, Bookmark, User, Settings, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Logo from './Logo';
 import UserMenu from './UserMenu';
@@ -13,7 +13,7 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -211,7 +211,7 @@ export default function Navbar() {
               ))}
 
               {/* Mobile auth buttons */}
-              {!user && (
+              {!user ? (
                 <motion.div
                   className="pt-3 mt-3 border-t border-white/[0.06] space-y-2"
                   initial={{ opacity: 0 }}
@@ -233,6 +233,50 @@ export default function Navbar() {
                   >
                     Create Account
                   </Link>
+                </motion.div>
+              ) : (
+                <motion.div
+                  className="pt-3 mt-3 border-t border-white/[0.06] space-y-1"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: navLinks.length * 0.05 }}
+                >
+                  <p className="px-4 py-2 text-xs font-semibold text-white/40 uppercase tracking-wider">Account</p>
+                  <Link
+                    to="/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/[0.04] font-medium text-sm transition-all"
+                  >
+                    <User size={16} strokeWidth={2.25} />
+                    Profile
+                  </Link>
+                  <Link
+                    to="/history"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/[0.04] font-medium text-sm transition-all"
+                  >
+                    <Bookmark size={16} strokeWidth={2.25} />
+                    Watch History
+                  </Link>
+                  <Link
+                    to="/settings"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/[0.04] font-medium text-sm transition-all"
+                  >
+                    <Settings size={16} strokeWidth={2.25} />
+                    Settings
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      logout();
+                      navigate('/login');
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 font-medium text-sm transition-all text-left"
+                  >
+                    <LogOut size={16} strokeWidth={2.25} />
+                    Sign Out
+                  </button>
                 </motion.div>
               )}
             </div>

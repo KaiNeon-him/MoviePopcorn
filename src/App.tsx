@@ -12,6 +12,9 @@ import TVShowsPage from './pages/TVShowsPage';
 import TrendingPage from './pages/TrendingPage';
 import WatchlistPage from './pages/WatchlistPage';
 import AuthPage from './pages/AuthPage';
+import ProfilePage from './pages/ProfilePage';
+import WatchHistoryPage from './pages/WatchHistoryPage';
+import SettingsPage from './pages/SettingsPage';
 
 function AppContent() {
   const location = useLocation();
@@ -27,6 +30,9 @@ function AppContent() {
           <Route path="/tv" element={<TVShowsPage />} />
           <Route path="/trending" element={<TrendingPage />} />
           <Route path="/watchlist" element={<WatchlistPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/history" element={<WatchHistoryPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="/movie/:id" element={<MoviePage />} />
           <Route path="/tv/:id" element={<TVPage />} />
           <Route path="/search" element={<SearchPage />} />

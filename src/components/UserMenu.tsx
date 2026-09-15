@@ -36,10 +36,10 @@ export default function UserMenu() {
   };
 
   const menuItems = [
-    { icon: User, label: 'Profile', onClick: () => setIsOpen(false) },
+    { icon: User, label: 'Profile', onClick: () => { navigate('/profile'); setIsOpen(false); } },
     { icon: Bookmark, label: 'Watchlist', onClick: () => { navigate('/watchlist'); setIsOpen(false); } },
-    { icon: History, label: 'Watch History', onClick: () => setIsOpen(false) },
-    { icon: Settings, label: 'Settings', onClick: () => setIsOpen(false) },
+    { icon: History, label: 'Watch History', onClick: () => { navigate('/history'); setIsOpen(false); } },
+    { icon: Settings, label: 'Settings', onClick: () => { navigate('/settings'); setIsOpen(false); } },
   ];
 
   return (
