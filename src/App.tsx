@@ -10,6 +10,7 @@ import SplashScreen from './components/SplashScreen';
 import AdBlockerDetector from './components/AdBlockerDetector';
 import InstallPrompt from './components/InstallPrompt';
 import CookieConsent from './components/CookieConsent';
+import ScrollToTop from './components/ScrollToTop';
 import HomePage from './pages/HomePage';
 import MoviePage from './pages/MoviePage';
 import TVPage from './pages/TVPage';
@@ -33,6 +34,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-dark text-white">
+      <ScrollToTop />
       {!isAuthPage && <Navbar />}
       <main>
         <Routes>
