@@ -57,6 +57,7 @@ export default function VideoPlayer({
   const [isMobile, setIsMobile] = useState(false);
   const [showSubtitleMenu, setShowSubtitleMenu] = useState(false);
   const [selectedSubtitle, setSelectedSubtitle] = useState(settings.subtitleLanguage || 'off');
+  const [isPortrait, setIsPortrait] = useState(false);
 
   // Get the media ID for progress saving
   const mediaId = imdbId || tmdbId || '';
@@ -70,6 +71,16 @@ export default function VideoPlayer({
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Detect portrait mode
+  useEffect(() => {
+    const checkOrientation = () => {
+      setIsPortrait(window.innerHeight > window.innerWidth);
+    };
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    return () => window.removeEventListener('resize', checkOrientation);
   }, []);
 
   // Manual rotate function
@@ -258,7 +269,15 @@ export default function VideoPlayer({
   return (
     <div className="relative w-full bg-black rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/[0.1]">
       {/* Video iframe - key forces reload only when source changes */}
-      <div className="relative w-full aspect-video">
+      <div 
+        className="relative w-full" 
+        style={{ 
+          aspectRatio: isPortrait ? 'auto' : '16/9',
+          height: isPortrait ? '60vh' : 'auto',
+          minHeight: '250px',
+          maxHeight: '85vh'
+        }}
+      >
         <iframe
           key={iframeKey}
           ref={iframeRef}
@@ -306,10 +325,10 @@ export default function VideoPlayer({
                 <AnimatePresence>
                   {showSourceMenu && (
                     <motion.div
-                      className="absolute top-full right-0 mt-2 w-48 bg-dark-lighter/95 backdrop-blur-2xl border border-white/[0.08] rounded-xl shadow-2xl overflow-hidden z-30"
-                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      className="absolute bottom-full right-0 mb-2 w-48 bg-dark-lighter/95 backdrop-blur-2xl border border-white/[0.08] rounded-xl shadow-2xl overflow-hidden z-30"
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     >
                       {sources.map((source, index) => (
                         <button
@@ -366,10 +385,10 @@ export default function VideoPlayer({
               <AnimatePresence>
                 {showSubtitleMenu && (
                   <motion.div
-                    className="absolute top-full right-0 mt-2 w-56 bg-dark-lighter/95 backdrop-blur-2xl border border-white/[0.08] rounded-xl shadow-2xl overflow-hidden z-30"
-                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    className="absolute bottom-full right-0 mb-2 w-56 bg-dark-lighter/95 backdrop-blur-2xl border border-white/[0.08] rounded-xl shadow-2xl overflow-hidden z-30"
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
                   >
                     <div className="p-2 border-b border-white/[0.06]">
                       <p className="text-xs text-white/40 font-semibold px-2 py-1">Select Subtitle Language</p>
