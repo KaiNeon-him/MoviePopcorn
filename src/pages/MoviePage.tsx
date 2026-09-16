@@ -6,6 +6,7 @@ import { MovieDetails, CastMember, fetchMovieDetails, fetchMovieCredits, getImag
 import { useWatchHistory } from '../hooks/useWatchHistory';
 import { useWatchlist } from '../hooks/useWatchlist';
 import VideoPlayer from '../components/VideoPlayer';
+import { DEFAULT_SOURCES } from '../config/videoSources';
 
 export default function MoviePage() {
   const { id } = useParams<{ id: string }>();
@@ -283,6 +284,8 @@ export default function MoviePage() {
                 title={movie.title || 'Movie'}
                 imdbId={movie.imdb_id}
                 tmdbId={movie.id.toString()}
+                mediaType="movie"
+                sources={DEFAULT_SOURCES}
                 onProgressUpdate={(progress, duration) => {
                   // Update watch history with current progress
                   const progressPercent = duration > 0 ? Math.round((progress / duration) * 100) : 0;

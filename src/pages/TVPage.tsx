@@ -6,6 +6,7 @@ import { MovieDetails, CastMember, Episode, fetchTVDetails, fetchTVCredits, fetc
 import { useWatchHistory } from '../hooks/useWatchHistory';
 import { useWatchlist } from '../hooks/useWatchlist';
 import VideoPlayer from '../components/VideoPlayer';
+import { DEFAULT_SOURCES } from '../config/videoSources';
 
 export default function TVPage() {
   const { id } = useParams<{ id: string }>();
@@ -275,6 +276,10 @@ export default function TVPage() {
                 title={`${show.name} S${selectedEpisode.season_number}E${selectedEpisode.episode_number}`}
                 imdbId={show.imdb_id}
                 tmdbId={show.id.toString()}
+                mediaType="tv"
+                season={selectedEpisode.season_number}
+                episode={selectedEpisode.episode_number}
+                sources={DEFAULT_SOURCES}
                 onProgressUpdate={(progress, duration) => {
                   // Update watch history with current progress
                   const progressPercent = duration > 0 ? Math.round((progress / duration) * 100) : 0;
