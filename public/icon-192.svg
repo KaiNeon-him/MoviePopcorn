@@ -1,0 +1,43 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="192" height="192" rx="32" fill="#0a0a0a"/>
+  <g transform="translate(46, 40)">
+    <!-- Film reels -->
+    <circle cx="25" cy="20" r="18" fill="#1a1a2e" stroke="#e50914" stroke-width="3"/>
+    <circle cx="25" cy="20" r="6" fill="#e50914"/>
+    <line x1="25" y1="8" x2="25" y2="32" stroke="#e50914" stroke-width="2"/>
+    <line x1="13" y1="20" x2="37" y2="20" stroke="#e50914" stroke-width="2"/>
+    
+    <circle cx="75" cy="20" r="18" fill="#1a1a2e" stroke="#f5c518" stroke-width="3"/>
+    <circle cx="75" cy="20" r="6" fill="#f5c518"/>
+    <line x1="75" y1="8" x2="75" y2="32" stroke="#f5c518" stroke-width="2"/>
+    <line x1="63" y1="20" x2="87" y2="20" stroke="#f5c518" stroke-width="2"/>
+    
+    <!-- Film strip -->
+    <path d="M 43 20 Q 50 12 57 20" stroke="#666" stroke-width="4" fill="none"/>
+    
+    <!-- Popcorn bucket -->
+    <path d="M 20 40 L 28 110 L 72 110 L 80 40 Z" fill="url(#bucketGradient)" stroke="#e50914" stroke-width="3"/>
+    
+    <!-- Bucket stripes -->
+    <path d="M 32 40 L 34 110" stroke="#fff" stroke-width="3" opacity="0.3"/>
+    <path d="M 48 40 L 49 110" stroke="#fff" stroke-width="3" opacity="0.3"/>
+    <path d="M 64 40 L 63 110" stroke="#fff" stroke-width="3" opacity="0.3"/>
+    
+    <!-- Play button -->
+    <path d="M 40 65 L 40 85 L 60 75 Z" fill="#f5c518" stroke="#fff" stroke-width="2"/>
+    
+    <!-- Popcorn kernels -->
+    <circle cx="35" cy="35" r="7" fill="#f5c518"/>
+    <circle cx="50" cy="30" r="8" fill="#fff"/>
+    <circle cx="65" cy="35" r="7" fill="#f5c518"/>
+    <circle cx="42" cy="25" r="6" fill="#fff" opacity="0.8"/>
+    <circle cx="58" cy="25" r="6" fill="#f5c518" opacity="0.8"/>
+  </g>
+  <defs>
+    <linearGradient id="bucketGradient" x1="20" y1="40" x2="80" y2="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#e50914"/>
+      <stop offset="50%" stop-color="#b20710"/>
+      <stop offset="100%" stop-color="#8b0000"/>
+    </linearGradient>
+  </defs>
+</svg>
