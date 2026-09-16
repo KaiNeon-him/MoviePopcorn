@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SkipForward, ChevronRight, RefreshCw, RotateCw, Subtitles } from 'lucide-react';
+import { ChevronRight, RefreshCw, RotateCw, Subtitles } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import StillWatchingModal from './StillWatchingModal';
 import { useStillWatching } from '../hooks/useStillWatching';
@@ -51,7 +51,6 @@ export default function VideoPlayer({
   
   // UI state
   const [showStillWatching, setShowStillWatching] = useState(false);
-  const [showSkipIntro, setShowSkipIntro] = useState(false);
   const [showNextEpisode, setShowNextEpisode] = useState(false);
   const [showSourceMenu, setShowSourceMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -166,11 +165,6 @@ export default function VideoPlayer({
       
       // Handle different statuses
       switch (player_status) {
-        case 'playing':
-          // Show skip intro button at the beginning (first 90 seconds)
-          setShowSkipIntro(currentTime < 90 && currentTime > 5);
-          break;
-          
         case 'completed':
           // Auto-play next episode if enabled
           if (hasNextEpisode && settings.autoplayNext) {
@@ -476,30 +470,6 @@ export default function VideoPlayer({
             )}
           </div>
         </div>
-
-        {/* Skip Intro Button */}
-        <AnimatePresence>
-          {showSkipIntro && (
-            <motion.button
-              onClick={() => {
-                iframeRef.current?.contentWindow?.postMessage(
-                  { type: 'PLAYER_COMMAND', command: 'seek', time: 90 },
-                  '*'
-                );
-                setShowSkipIntro(false);
-              }}
-              className="absolute bottom-32 right-4 sm:bottom-36 sm:right-8 flex items-center gap-2 px-5 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all shadow-lg z-20"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 50 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <SkipForward size={18} strokeWidth={2.5} />
-              <span className="text-sm font-semibold">Skip Intro</span>
-            </motion.button>
-          )}
-        </AnimatePresence>
 
         {/* Next Episode Button */}
         <AnimatePresence>
