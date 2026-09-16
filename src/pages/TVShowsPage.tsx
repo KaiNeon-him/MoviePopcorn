@@ -1,31 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Movie, fetchPopularTV, fetchTopRatedTV } from '../api/tmdb';
-import MovieCard from '../components/MovieCard';
+import { fetchPopularTV, fetchTopRatedTV } from '../api/tmdb';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
+import InfiniteScrollGrid from '../components/InfiniteScrollGrid';
 
 type Category = 'popular' | 'top_rated';
 
-const CATEGORIES: { key: Category; label: string; emoji: string }[] = [
-  { key: 'popular', label: 'Popular', emoji: '📺' },
-  { key: 'top_rated', label: 'Top Rated', emoji: '⭐' },
+const CATEGORIES: { key: Category; label: string; emoji: string; fetchFn: (page: number) => Promise<any[]> }[] = [
+  { key: 'popular', label: 'Popular', emoji: '📺', fetchFn: fetchPopularTV },
+  { key: 'top_rated', label: 'Top Rated', emoji: '⭐', fetchFn: fetchTopRatedTV },
 ];
 
 export default function TVShowsPage() {
   const [category, setCategory] = useState<Category>('popular');
-  const [shows, setShows] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  const currentCategory = CATEGORIES.find(c => c.key === category)!;
+  
+  const { items, loading, hasMore, error, loadMoreRef, reset } = useInfiniteScroll({
+    fetchFn: currentCategory.fetchFn,
+  });
 
-  useEffect(() => {
-    setLoading(true);
-    const fetchFn = {
-      popular: fetchPopularTV,
-      top_rated: fetchTopRatedTV,
-    }[category];
-    fetchFn().then((data) => {
-      setShows(data);
-      setLoading(false);
-    });
-  }, [category]);
+  const handleCategoryChange = (newCategory: Category) => {
+    setCategory(newCategory);
+  };
 
   return (
     <motion.div
@@ -48,7 +45,7 @@ export default function TVShowsPage() {
           {CATEGORIES.map((cat, index) => (
             <motion.button
               key={cat.key}
-              onClick={() => setCategory(cat.key)}
+              onClick={() => handleCategoryChange(cat.key)}
               className={`relative px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 overflow-hidden ${
                 category === cat.key
                   ? 'text-white shadow-lg shadow-primary/30'
@@ -75,26 +72,16 @@ export default function TVShowsPage() {
           ))}
         </div>
 
-        {/* Grid */}
-        {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {Array.from({ length: 18 }).map((_, i) => (
-              <div key={i} className="aspect-[2/3] shimmer rounded-2xl" />
-            ))}
-          </div>
-        ) : (
-          <motion.div
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
-            key={category}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            {shows.map((show, index) => (
-              <MovieCard key={show.id} movie={show} mediaType="tv" index={index} />
-            ))}
-          </motion.div>
-        )}
+        {/* Infinite scroll grid */}
+        <InfiniteScrollGrid
+          key={category}
+          items={items}
+          loading={loading}
+          hasMore={hasMore}
+          error={error}
+          loadMoreRef={loadMoreRef}
+          mediaType="tv"
+        />
       </div>
     </motion.div>
   );

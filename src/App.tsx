@@ -19,6 +19,10 @@ import MoviesPage from './pages/MoviesPage';
 import TVShowsPage from './pages/TVShowsPage';
 import TrendingPage from './pages/TrendingPage';
 import WatchlistPage from './pages/WatchlistPage';
+import AnimePage from './pages/AnimePage';
+import KDramasPage from './pages/KDramasPage';
+import CDramasPage from './pages/CDramasPage';
+import DocumentariesPage from './pages/DocumentariesPage';
 import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
 import WatchHistoryPage from './pages/WatchHistoryPage';
@@ -41,6 +45,10 @@ function AppContent() {
           <Route path="/" element={<HomePage />} />
           <Route path="/movies" element={<MoviesPage />} />
           <Route path="/tv" element={<TVShowsPage />} />
+          <Route path="/anime" element={<AnimePage />} />
+          <Route path="/kdramas" element={<KDramasPage />} />
+          <Route path="/cdramas" element={<CDramasPage />} />
+          <Route path="/documentaries" element={<DocumentariesPage />} />
           <Route path="/trending" element={<TrendingPage />} />
           <Route path="/watchlist" element={<WatchlistPage />} />
           <Route path="/profile" element={<ProfilePage />} />

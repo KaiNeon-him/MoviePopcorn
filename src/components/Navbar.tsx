@@ -63,6 +63,10 @@ export default function Navbar() {
     { to: '/', label: 'Home', icon: House, description: 'Discover new content' },
     { to: '/movies', label: 'Movies', icon: FilmStrip, description: 'Browse all movies' },
     { to: '/tv', label: 'TV Shows', icon: Television, description: 'Explore TV series' },
+    { to: '/anime', label: 'Anime', icon: FilmStrip, description: 'Japanese animation' },
+    { to: '/kdramas', label: 'K-Dramas', icon: Television, description: 'Korean dramas' },
+    { to: '/cdramas', label: 'C-Dramas', icon: Television, description: 'Chinese dramas' },
+    { to: '/documentaries', label: 'Documentaries', icon: FilmStrip, description: 'Real stories' },
     { to: '/trending', label: 'Trending', icon: TrendUp, description: 'What\'s hot now' },
     { to: '/watchlist', label: 'Watchlist', icon: BookmarkSimple, description: 'Your saved items' },
   ];
