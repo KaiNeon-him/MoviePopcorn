@@ -281,6 +281,19 @@ export default function MoviePage() {
               <VideoPlayer
                 src={embedUrl}
                 title={movie.title || 'Movie'}
+                imdbId={movie.imdb_id}
+                tmdbId={movie.id.toString()}
+                onProgressUpdate={(progress, duration) => {
+                  // Update watch history with current progress
+                  const progressPercent = duration > 0 ? Math.round((progress / duration) * 100) : 0;
+                  addToHistory({
+                    id: movie.id,
+                    title: movie.title || '',
+                    poster_path: movie.poster_path,
+                    media_type: 'movie',
+                    progress: progressPercent,
+                  });
+                }}
               />
               <p className="text-white/40 text-xs mt-3 text-center font-medium">
                 Powered by VidAPI • If the player doesn't load, try refreshing
