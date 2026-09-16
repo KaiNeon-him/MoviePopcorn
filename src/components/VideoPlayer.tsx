@@ -174,6 +174,8 @@ export default function VideoPlayer({
     setShowStillWatching(false);
   };
 
+  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+
   return (
     <div className="relative w-full bg-black rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/[0.1]">
       {/* Video iframe - key forces reload only when source changes */}
