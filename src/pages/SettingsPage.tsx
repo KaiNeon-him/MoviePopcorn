@@ -222,41 +222,7 @@ export default function SettingsPage() {
               />
             </div>
 
-            {/* Auto Skip Intro */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <SkipForward size={20} strokeWidth={2} className="text-white/60" />
-                <div>
-                  <p className="text-sm font-medium text-white">Auto Skip Intro</p>
-                  <p className="text-xs text-white/40">Automatically skip intro sequences</p>
-                </div>
-              </div>
-              <ToggleSwitch 
-                enabled={settings.autoSkipIntro} 
-                onChange={(value) => {
-                  updateSettings({ autoSkipIntro: value });
-                  info('Auto Skip Intro Updated', value ? 'Intro will be skipped automatically' : 'Intro will not be skipped');
-                }}
-              />
-            </div>
 
-            {/* Auto Skip Outro */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <SkipForward size={20} strokeWidth={2} className="text-white/60" />
-                <div>
-                  <p className="text-sm font-medium text-white">Auto Skip Outro</p>
-                  <p className="text-xs text-white/40">Automatically skip outro sequences</p>
-                </div>
-              </div>
-              <ToggleSwitch 
-                enabled={settings.autoSkipOutro} 
-                onChange={(value) => {
-                  updateSettings({ autoSkipOutro: value });
-                  info('Auto Skip Outro Updated', value ? 'Outro will be skipped automatically' : 'Outro will not be skipped');
-                }}
-              />
-            </div>
 
             {/* Note about auto-skip compatibility */}
             <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">

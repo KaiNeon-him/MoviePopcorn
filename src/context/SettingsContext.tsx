@@ -8,8 +8,6 @@ export interface AppSettings {
   stillWatching: boolean;
   inactivityTimeout: number;
   autoPauseCountdown: number;
-  autoSkipIntro: boolean;
-  autoSkipOutro: boolean;
   
   // Audio & Subtitles
   subtitles: boolean;
@@ -60,8 +58,6 @@ const DEFAULT_SETTINGS: AppSettings = {
   stillWatching: true,
   inactivityTimeout: 10,
   autoPauseCountdown: 30,
-  autoSkipIntro: true,
-  autoSkipOutro: true,
   subtitles: false,
   subtitleLanguage: 'en',
   audioLanguage: 'en',
