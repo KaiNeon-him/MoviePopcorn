@@ -116,18 +116,18 @@ export default function Navbar() {
             <AnimatePresence>
               {dropdownOpen && (
                 <motion.div
-                  className="absolute top-full left-0 mt-3 w-72 bg-dark-lighter/98 backdrop-blur-2xl border-2 border-primary/30 rounded-2xl shadow-2xl shadow-primary/20 overflow-hidden z-50"
+                  className="absolute top-full left-0 mt-3 w-72 bg-dark-lighter/98 backdrop-blur-2xl border-2 border-primary/30 rounded-2xl shadow-2xl shadow-primary/20 z-50"
                   initial={{ opacity: 0, y: -10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
                 >
                   {/* Arrow pointing up */}
-                  <div className="absolute -top-2 left-6 w-4 h-4 bg-dark-lighter/98 border-l-2 border-t-2 border-primary/30 transform rotate-45" />
+                  <div className="absolute -top-2 left-6 w-4 h-4 bg-dark-lighter/98 border-l-2 border-t-2 border-primary/30 transform rotate-45 z-10" />
                   
-                  <div className="p-3">
+                  <div className="p-3 max-h-[70vh] overflow-y-auto">
                     {/* Header */}
-                    <div className="px-3 py-2 mb-2 border-b border-white/[0.06]">
+                    <div className="px-3 py-2 mb-2 border-b border-white/[0.06] sticky top-0 bg-dark-lighter/98 backdrop-blur-2xl z-10">
                       <p className="text-xs font-semibold text-white/40 uppercase tracking-wider">Navigation</p>
                     </div>
                     
