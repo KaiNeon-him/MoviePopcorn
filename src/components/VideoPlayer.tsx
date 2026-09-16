@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SkipForward, ChevronRight, RefreshCw } from 'lucide-react';
+import { SkipForward, ChevronRight, RefreshCw, RotateCw } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import StillWatchingModal from './StillWatchingModal';
 import { useStillWatching } from '../hooks/useStillWatching';
@@ -54,10 +54,36 @@ export default function VideoPlayer({
   const [showSkipIntro, setShowSkipIntro] = useState(false);
   const [showNextEpisode, setShowNextEpisode] = useState(false);
   const [showSourceMenu, setShowSourceMenu] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Get the media ID for progress saving
   const mediaId = imdbId || tmdbId || '';
   const progressKey = `moviepopcorn_progress_${mediaId}`;
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Manual rotate function
+  const handleRotate = async () => {
+    if (!('orientation' in screen)) {
+      alert('Screen rotation is not supported on this device');
+      return;
+    }
+    
+    try {
+      await (screen.orientation as any).lock('landscape');
+    } catch (err) {
+      console.log('Rotation failed:', err);
+      alert('Please rotate your device manually to landscape mode for the best viewing experience');
+    }
+  };
 
   // Build the embed URL ONCE on mount - this prevents iframe reloads
   // Only rebuilds when src or mediaId changes (i.e., different movie/episode)
@@ -166,6 +192,41 @@ export default function VideoPlayer({
     onTimeout: () => setShowStillWatching(true),
   });
 
+  // Auto-rotate to landscape on mobile when playing
+  useEffect(() => {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (!isMobile || !('orientation' in screen)) return;
+
+    const lockLandscape = async () => {
+      try {
+        await (screen.orientation as any).lock('landscape');
+      } catch (err) {
+        console.log('Orientation lock not supported or failed:', err);
+      }
+    };
+
+    const unlockOrientation = async () => {
+      try {
+        (screen.orientation as any).unlock();
+      } catch (err) {
+        console.log('Orientation unlock failed:', err);
+      }
+    };
+
+    // Lock to landscape when video starts playing
+    if (playerStatus === 'playing') {
+      lockLandscape();
+    } else {
+      unlockOrientation();
+    }
+
+    // Cleanup: unlock when component unmounts
+    return () => {
+      unlockOrientation();
+    };
+  }, [playerStatus]);
+
   const handleContinueWatching = () => {
     setShowStillWatching(false);
   };
@@ -267,6 +328,19 @@ export default function VideoPlayer({
             >
               <RefreshCw size={14} strokeWidth={2.5} />
             </motion.button>
+
+            {/* Rotate button - only show on mobile */}
+            {isMobile && (
+              <motion.button
+                onClick={handleRotate}
+                className="p-1.5 rounded-lg bg-black/60 backdrop-blur-sm text-white/70 hover:text-white hover:bg-black/80 transition-all md:hidden"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                title="Rotate to landscape"
+              >
+                <RotateCw size={14} strokeWidth={2.5} />
+              </motion.button>
+            )}
           </div>
         </div>
 
