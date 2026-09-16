@@ -51,13 +51,12 @@ export default function VideoPlayer({
     // Keep VidAPI's native controls visible (play/pause/volume/progress)
     // Don't set controls=false - let users control playback
     
+    // Hide VidAPI's hover overlay and title area (we show our own title)
+    // This prevents visual conflicts with our overlays
+    url.searchParams.set('overlay', 'false');
+    
     // Set primary color to match our theme
     url.searchParams.set('primaryColor', '#e50914');
-    
-    // Set title
-    if (title) {
-      url.searchParams.set('title', title);
-    }
     
     // Resume from saved position
     const savedProgress = localStorage.getItem(progressKey);
@@ -176,7 +175,7 @@ export default function VideoPlayer({
         )}
       </div>
 
-      {/* Skip Intro Button */}
+      {/* Skip Intro Button - positioned above VidAPI controls */}
       <AnimatePresence>
         {showSkipIntro && (
           <motion.button
@@ -188,7 +187,7 @@ export default function VideoPlayer({
               );
               setShowSkipIntro(false);
             }}
-            className="absolute bottom-24 right-4 sm:bottom-28 sm:right-8 flex items-center gap-2 px-5 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all shadow-lg z-20"
+            className="absolute bottom-32 right-4 sm:bottom-36 sm:right-8 flex items-center gap-2 px-5 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all shadow-lg z-20"
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 50 }}
@@ -201,12 +200,12 @@ export default function VideoPlayer({
         )}
       </AnimatePresence>
 
-      {/* Next Episode Button */}
+      {/* Next Episode Button - positioned above VidAPI controls */}
       <AnimatePresence>
         {showNextEpisode && hasNextEpisode && (
           <motion.button
             onClick={() => onNextEpisode?.()}
-            className="absolute bottom-24 right-4 sm:bottom-28 sm:right-8 flex items-center gap-2 px-5 py-3 rounded-xl bg-primary/90 backdrop-blur-md border border-primary text-white hover:bg-primary transition-all shadow-lg z-20"
+            className="absolute bottom-32 right-4 sm:bottom-36 sm:right-8 flex items-center gap-2 px-5 py-3 rounded-xl bg-primary/90 backdrop-blur-md border border-primary text-white hover:bg-primary transition-all shadow-lg z-20"
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 50 }}
