@@ -273,6 +273,21 @@ export default function TVPage() {
               <VideoPlayer
                 src={embedUrl}
                 title={`${show.name} S${selectedEpisode.season_number}E${selectedEpisode.episode_number}`}
+                imdbId={show.imdb_id}
+                tmdbId={show.id.toString()}
+                onProgressUpdate={(progress, duration) => {
+                  // Update watch history with current progress
+                  const progressPercent = duration > 0 ? Math.round((progress / duration) * 100) : 0;
+                  addToHistory({
+                    id: show.id,
+                    title: show.name || '',
+                    poster_path: show.poster_path,
+                    media_type: 'tv',
+                    season: selectedEpisode.season_number,
+                    episode: selectedEpisode.episode_number,
+                    progress: progressPercent,
+                  });
+                }}
               />
               <p className="text-white/40 text-xs mt-3 text-center font-medium">
                 Powered by VidAPI • If the player doesn't load, try refreshing
