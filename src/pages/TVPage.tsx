@@ -78,6 +78,9 @@ export default function TVPage() {
       season: episode.season_number,
       episode: episode.episode_number,
     });
+    
+    // Scroll to top smoothly when episode is clicked
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleWatchlistToggle = () => {
