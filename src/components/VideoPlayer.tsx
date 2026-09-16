@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SkipForward, ChevronRight } from 'lucide-react';
+import { SkipForward, ChevronRight, RefreshCw } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import StillWatchingModal from './StillWatchingModal';
 import { useStillWatching } from '../hooks/useStillWatching';
@@ -13,6 +13,14 @@ interface VideoPlayerProps {
   onNextEpisode?: () => void;
   hasNextEpisode?: boolean;
   onProgressUpdate?: (progress: number, duration: number) => void;
+  // Multiple server sources for fallback
+  sources?: Array<{
+    name: string;
+    buildUrl: (id: string, type: 'movie' | 'tv', season?: number, episode?: number) => string;
+  }>;
+  mediaType?: 'movie' | 'tv';
+  season?: number;
+  episode?: number;
 }
 
 type PlayerStatus = 'playing' | 'paused' | 'completed' | 'seeked' | 'idle';
@@ -24,10 +32,16 @@ export default function VideoPlayer({
   tmdbId,
   onNextEpisode, 
   hasNextEpisode = false,
-  onProgressUpdate
+  onProgressUpdate,
+  sources = [],
+  mediaType = 'movie',
+  season,
+  episode
 }: VideoPlayerProps) {
   const { settings } = useSettings();
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [currentSourceIndex, setCurrentSourceIndex] = useState(0);
+  const [iframeKey, setIframeKey] = useState(0); // Force iframe reload only when needed
   
   // Player state from VidAPI events
   const [playerStatus, setPlayerStatus] = useState<PlayerStatus>('idle');
@@ -39,20 +53,25 @@ export default function VideoPlayer({
   const [showStillWatching, setShowStillWatching] = useState(false);
   const [showSkipIntro, setShowSkipIntro] = useState(false);
   const [showNextEpisode, setShowNextEpisode] = useState(false);
+  const [showSourceMenu, setShowSourceMenu] = useState(false);
 
   // Get the media ID for progress saving
   const mediaId = imdbId || tmdbId || '';
   const progressKey = `moviepopcorn_progress_${mediaId}`;
 
-  // Build the embed URL with parameters
-  const buildEmbedUrl = useCallback(() => {
+  // Build the embed URL ONCE on mount - this prevents iframe reloads
+  // Only rebuilds when src or mediaId changes (i.e., different movie/episode)
+  const embedUrl = useMemo(() => {
+    // If we have multiple sources, use the current one
+    if (sources.length > 0 && sources[currentSourceIndex]) {
+      const id = imdbId || tmdbId || '';
+      return sources[currentSourceIndex].buildUrl(id, mediaType, season, episode);
+    }
+    
+    // Otherwise use the provided src
     const url = new URL(src);
     
-    // Keep VidAPI's native controls visible (play/pause/volume/progress)
-    // Don't set controls=false - let users control playback
-    
-    // Hide VidAPI's hover overlay and title area (we show our own title)
-    // This prevents visual conflicts with our overlays
+    // Hide VidAPI's hover overlay (we show our own title)
     url.searchParams.set('overlay', 'false');
     
     // Set primary color to match our theme
@@ -73,7 +92,20 @@ export default function VideoPlayer({
     }
     
     return url.toString();
-  }, [src, title, settings, progressKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src, imdbId, tmdbId, season, episode, currentSourceIndex]);
+  
+  // Switch to a different server source
+  const switchSource = (index: number) => {
+    setCurrentSourceIndex(index);
+    setIframeKey(prev => prev + 1); // Force iframe reload with new source
+    setShowSourceMenu(false);
+  };
+  
+  // Reload current source (useful if playback is broken)
+  const reloadPlayer = () => {
+    setIframeKey(prev => prev + 1);
+  };
 
   // Listen for VidAPI player events via postMessage
   useEffect(() => {
@@ -143,80 +175,141 @@ export default function VideoPlayer({
   };
 
   return (
-    <div className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/[0.1]">
-      {/* VidAPI iframe with native controls */}
-      <iframe
-        ref={iframeRef}
-        src={buildEmbedUrl()}
-        width="100%"
-        height="100%"
-        frameBorder="0"
-        allowFullScreen
-        allow="autoplay; fullscreen; encrypted-media"
-        className="w-full h-full"
-        title={title}
-      />
+    <div className="relative w-full bg-black rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/[0.1]">
+      {/* Video iframe - key forces reload only when source changes */}
+      <div className="relative w-full aspect-video">
+        <iframe
+          key={iframeKey}
+          ref={iframeRef}
+          src={embedUrl}
+          width="100%"
+          height="100%"
+          frameBorder="0"
+          allowFullScreen
+          allow="autoplay; fullscreen; encrypted-media"
+          className="w-full h-full"
+          title={title}
+        />
 
-      {/* Minimal overlay - just title and quality badge */}
-      <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between pointer-events-none">
-        <motion.h3 
-          className="text-white font-semibold text-lg truncate max-w-[70%] drop-shadow-lg"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          {title}
-        </motion.h3>
-        
-        {/* Quality badge */}
-        {quality && (
-          <div className="px-2 py-1 rounded bg-black/60 backdrop-blur-sm text-white text-xs font-semibold">
-            {quality}
+        {/* Top overlay - title and controls */}
+        <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between pointer-events-none">
+          <motion.h3 
+            className="text-white font-semibold text-lg truncate max-w-[60%] drop-shadow-lg"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            {title}
+          </motion.h3>
+          
+          <div className="flex items-center gap-2 pointer-events-auto">
+            {/* Quality badge */}
+            {quality && (
+              <div className="px-2 py-1 rounded bg-black/60 backdrop-blur-sm text-white text-xs font-semibold">
+                {quality}
+              </div>
+            )}
+            
+            {/* Source switcher - only if multiple sources */}
+            {sources.length > 1 && (
+              <div className="relative">
+                <motion.button
+                  onClick={() => setShowSourceMenu(!showSourceMenu)}
+                  className="px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm text-white text-xs font-semibold hover:bg-black/80 transition-all flex items-center gap-1.5"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <span>Server {currentSourceIndex + 1}</span>
+                  <ChevronRight size={12} className={`transition-transform ${showSourceMenu ? 'rotate-90' : ''}`} />
+                </motion.button>
+                
+                <AnimatePresence>
+                  {showSourceMenu && (
+                    <motion.div
+                      className="absolute top-full right-0 mt-2 w-48 bg-dark-lighter/95 backdrop-blur-2xl border border-white/[0.08] rounded-xl shadow-2xl overflow-hidden z-30"
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    >
+                      {sources.map((source, index) => (
+                        <button
+                          key={source.name}
+                          onClick={() => switchSource(index)}
+                          className={`w-full px-4 py-2.5 text-left text-sm transition-all ${
+                            index === currentSourceIndex
+                              ? 'bg-primary/20 text-primary font-semibold'
+                              : 'text-white/70 hover:bg-white/[0.06] hover:text-white'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span>{source.name}</span>
+                            {index === currentSourceIndex && (
+                              <span className="w-2 h-2 rounded-full bg-primary" />
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+            
+            {/* Reload button */}
+            <motion.button
+              onClick={reloadPlayer}
+              className="p-1.5 rounded-lg bg-black/60 backdrop-blur-sm text-white/70 hover:text-white hover:bg-black/80 transition-all"
+              whileHover={{ scale: 1.1, rotate: 180 }}
+              whileTap={{ scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+              title="Reload player"
+            >
+              <RefreshCw size={14} strokeWidth={2.5} />
+            </motion.button>
           </div>
-        )}
+        </div>
+
+        {/* Skip Intro Button */}
+        <AnimatePresence>
+          {showSkipIntro && (
+            <motion.button
+              onClick={() => {
+                iframeRef.current?.contentWindow?.postMessage(
+                  { type: 'PLAYER_COMMAND', command: 'seek', time: 90 },
+                  '*'
+                );
+                setShowSkipIntro(false);
+              }}
+              className="absolute bottom-32 right-4 sm:bottom-36 sm:right-8 flex items-center gap-2 px-5 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all shadow-lg z-20"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <SkipForward size={18} strokeWidth={2.5} />
+              <span className="text-sm font-semibold">Skip Intro</span>
+            </motion.button>
+          )}
+        </AnimatePresence>
+
+        {/* Next Episode Button */}
+        <AnimatePresence>
+          {showNextEpisode && hasNextEpisode && (
+            <motion.button
+              onClick={() => onNextEpisode?.()}
+              className="absolute bottom-32 right-4 sm:bottom-36 sm:right-8 flex items-center gap-2 px-5 py-3 rounded-xl bg-primary/90 backdrop-blur-md border border-primary text-white hover:bg-primary transition-all shadow-lg z-20"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <span className="text-sm font-semibold">Next Episode</span>
+              <ChevronRight size={18} strokeWidth={2.5} />
+            </motion.button>
+          )}
+        </AnimatePresence>
       </div>
-
-      {/* Skip Intro Button - positioned above VidAPI controls */}
-      <AnimatePresence>
-        {showSkipIntro && (
-          <motion.button
-            onClick={() => {
-              // Send skip command to VidAPI
-              iframeRef.current?.contentWindow?.postMessage(
-                { type: 'PLAYER_COMMAND', command: 'seek', time: 90 },
-                '*'
-              );
-              setShowSkipIntro(false);
-            }}
-            className="absolute bottom-32 right-4 sm:bottom-36 sm:right-8 flex items-center gap-2 px-5 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all shadow-lg z-20"
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 50 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <SkipForward size={18} strokeWidth={2.5} />
-            <span className="text-sm font-semibold">Skip Intro</span>
-          </motion.button>
-        )}
-      </AnimatePresence>
-
-      {/* Next Episode Button - positioned above VidAPI controls */}
-      <AnimatePresence>
-        {showNextEpisode && hasNextEpisode && (
-          <motion.button
-            onClick={() => onNextEpisode?.()}
-            className="absolute bottom-32 right-4 sm:bottom-36 sm:right-8 flex items-center gap-2 px-5 py-3 rounded-xl bg-primary/90 backdrop-blur-md border border-primary text-white hover:bg-primary transition-all shadow-lg z-20"
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 50 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <span className="text-sm font-semibold">Next Episode</span>
-            <ChevronRight size={18} strokeWidth={2.5} />
-          </motion.button>
-        )}
-      </AnimatePresence>
 
       {/* Still Watching Modal */}
       <StillWatchingModal
