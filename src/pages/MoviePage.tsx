@@ -64,6 +64,9 @@ export default function MoviePage() {
         media_type: 'movie',
         progress: 0,
       });
+      
+      // Scroll to top smoothly when player is shown
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 

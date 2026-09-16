@@ -258,6 +258,13 @@ export default function SettingsPage() {
               />
             </div>
 
+            {/* Note about auto-skip compatibility */}
+            <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <p className="text-xs text-blue-300 leading-relaxed">
+                <strong>Note:</strong> Auto-skip intro/outro features work with compatible video sources. VidAPI handles playback controls internally, so these settings may not apply to all content.
+              </p>
+            </div>
+
             {/* Video Quality */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">

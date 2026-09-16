@@ -21,58 +21,11 @@ const vidapi: VideoSource = {
   }
 };
 
-// VidSrc.to - Alternative source
-const vidsrcTo: VideoSource = {
-  name: 'VidSrc',
-  buildUrl: (id, type, season, episode) => {
-    if (type === 'movie') {
-      return `https://vidsrc.to/embed/movie/${id}`;
-    }
-    return `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`;
-  }
-};
-
-// 2Embed - Another alternative
-const twoEmbed: VideoSource = {
-  name: '2Embed',
-  buildUrl: (id, type, season, episode) => {
-    if (type === 'movie') {
-      return `https://www.2embed.cc/embed/${id}`;
-    }
-    return `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`;
-  }
-};
-
-// SuperEmbed - High quality alternative
-const superEmbed: VideoSource = {
-  name: 'SuperEmbed',
-  buildUrl: (id, type, season, episode) => {
-    if (type === 'movie') {
-      return `https://multiembed.mov/?video_id=${id}&tmdb=1`;
-    }
-    return `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
-  }
-};
-
-// MoviesAPI - Another source
-const moviesApi: VideoSource = {
-  name: 'MoviesAPI',
-  buildUrl: (id, type, season, episode) => {
-    if (type === 'movie') {
-      return `https://moviesapi.club/movie/${id}`;
-    }
-    return `https://moviesapi.club/tv/${id}-${season}-${episode}`;
-  }
-};
-
-// Default sources list - ordered by reliability
-// Users can switch between these if one is down or buffering
+// Default sources list - currently only VidAPI works reliably
+// Other sources (VidSrc, 2Embed, SuperEmbed, MoviesAPI) are blocked by browsers
+// Users can add more sources here if they find working alternatives
 export const DEFAULT_SOURCES: VideoSource[] = [
   vidapi,
-  vidsrcTo,
-  twoEmbed,
-  superEmbed,
-  moviesApi,
 ];
 
 // Helper to get source by name
