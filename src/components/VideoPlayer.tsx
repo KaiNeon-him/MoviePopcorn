@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SkipForward, ChevronRight, RefreshCw, RotateCw } from 'lucide-react';
+import { SkipForward, ChevronRight, RefreshCw, RotateCw, Subtitles } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import StillWatchingModal from './StillWatchingModal';
 import { useStillWatching } from '../hooks/useStillWatching';
@@ -55,6 +55,8 @@ export default function VideoPlayer({
   const [showNextEpisode, setShowNextEpisode] = useState(false);
   const [showSourceMenu, setShowSourceMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showSubtitleMenu, setShowSubtitleMenu] = useState(false);
+  const [selectedSubtitle, setSelectedSubtitle] = useState(settings.subtitleLanguage || 'off');
 
   // Get the media ID for progress saving
   const mediaId = imdbId || tmdbId || '';
@@ -112,14 +114,15 @@ export default function VideoPlayer({
     // Autoplay based on settings
     url.searchParams.set('autoplay', settings.autoplay ? '1' : '0');
     
-    // Subtitle language
-    if (settings.subtitles && settings.subtitleLanguage) {
-      url.searchParams.set('ds_lang', settings.subtitleLanguage);
+    // Subtitle language - use selected subtitle or default from settings
+    const subtitleLang = selectedSubtitle !== 'off' ? selectedSubtitle : (settings.subtitles ? settings.subtitleLanguage : null);
+    if (subtitleLang) {
+      url.searchParams.set('ds_lang', subtitleLang);
     }
     
     return url.toString();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src, imdbId, tmdbId, season, episode, currentSourceIndex]);
+  }, [src, imdbId, tmdbId, season, episode, currentSourceIndex, selectedSubtitle]);
   
   // Switch to a different server source
   const switchSource = (index: number) => {
@@ -172,6 +175,21 @@ export default function VideoPlayer({
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, [hasNextEpisode, settings.autoplayNext, onNextEpisode, onProgressUpdate, currentTime]);
+
+  // Close subtitle menu when clicking outside
+  useEffect(() => {
+    if (!showSubtitleMenu) return;
+    
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('[data-subtitle-menu]')) {
+        setShowSubtitleMenu(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showSubtitleMenu]);
 
   // Save progress periodically
   useEffect(() => {
@@ -328,6 +346,102 @@ export default function VideoPlayer({
             >
               <RefreshCw size={14} strokeWidth={2.5} />
             </motion.button>
+
+            {/* Subtitle button */}
+            <div className="relative" data-subtitle-menu>
+              <motion.button
+                onClick={() => setShowSubtitleMenu(!showSubtitleMenu)}
+                className={`p-1.5 rounded-lg backdrop-blur-sm transition-all ${
+                  selectedSubtitle !== 'off' 
+                    ? 'bg-primary/60 text-white hover:bg-primary/80' 
+                    : 'bg-black/60 text-white/70 hover:text-white hover:bg-black/80'
+                }`}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                title="Subtitles"
+              >
+                <Subtitles size={14} strokeWidth={2.5} />
+              </motion.button>
+              
+              <AnimatePresence>
+                {showSubtitleMenu && (
+                  <motion.div
+                    className="absolute top-full right-0 mt-2 w-56 bg-dark-lighter/95 backdrop-blur-2xl border border-white/[0.08] rounded-xl shadow-2xl overflow-hidden z-30"
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  >
+                    <div className="p-2 border-b border-white/[0.06]">
+                      <p className="text-xs text-white/40 font-semibold px-2 py-1">Select Subtitle Language</p>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto">
+                      <button
+                        onClick={() => {
+                          setSelectedSubtitle('off');
+                          setShowSubtitleMenu(false);
+                          reloadPlayer();
+                        }}
+                        className={`w-full px-4 py-2.5 text-left text-sm transition-all ${
+                          selectedSubtitle === 'off'
+                            ? 'bg-primary/20 text-primary font-semibold'
+                            : 'text-white/70 hover:bg-white/[0.06] hover:text-white'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span>Off</span>
+                          {selectedSubtitle === 'off' && (
+                            <span className="w-2 h-2 rounded-full bg-primary" />
+                          )}
+                        </div>
+                      </button>
+                      {[
+                        { code: 'en', name: 'English' },
+                        { code: 'es', name: 'Spanish' },
+                        { code: 'fr', name: 'French' },
+                        { code: 'de', name: 'German' },
+                        { code: 'it', name: 'Italian' },
+                        { code: 'pt', name: 'Portuguese' },
+                        { code: 'ru', name: 'Russian' },
+                        { code: 'zh', name: 'Chinese' },
+                        { code: 'ja', name: 'Japanese' },
+                        { code: 'ko', name: 'Korean' },
+                        { code: 'ar', name: 'Arabic' },
+                        { code: 'hi', name: 'Hindi' },
+                        { code: 'tr', name: 'Turkish' },
+                        { code: 'pl', name: 'Polish' },
+                        { code: 'nl', name: 'Dutch' },
+                      ].map((lang) => (
+                        <button
+                          key={lang.code}
+                          onClick={() => {
+                            setSelectedSubtitle(lang.code);
+                            setShowSubtitleMenu(false);
+                            reloadPlayer();
+                          }}
+                          className={`w-full px-4 py-2.5 text-left text-sm transition-all ${
+                            selectedSubtitle === lang.code
+                              ? 'bg-primary/20 text-primary font-semibold'
+                              : 'text-white/70 hover:bg-white/[0.06] hover:text-white'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span>{lang.name}</span>
+                            {selectedSubtitle === lang.code && (
+                              <span className="w-2 h-2 rounded-full bg-primary" />
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="p-2 border-t border-white/[0.06]">
+                      <p className="text-xs text-white/40 px-2 py-1">
+                        Powered by OpenSubtitles via VidAPI
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* Rotate button - only show on mobile */}
             {isMobile && (
