@@ -100,35 +100,30 @@ export async function fetchTopRatedTV(page: number = 1): Promise<Movie[]> {
   return data.results || [];
 }
 
-// Anime - Animation genre (ID: 16)
 export async function fetchAnime(page: number = 1): Promise<Movie[]> {
   const res = await fetch(`${TMDB_BASE_URL}/discover/tv?api_key=${API_KEY}&with_genres=16&page=${page}&sort_by=popularity.desc&with_original_language=ja`);
   const data = await res.json();
   return data.results || [];
 }
 
-// Anime Movies
 export async function fetchAnimeMovies(page: number = 1): Promise<Movie[]> {
   const res = await fetch(`${TMDB_BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=16&page=${page}&sort_by=popularity.desc&with_original_language=ja`);
   const data = await res.json();
   return data.results || [];
 }
 
-// K-Dramas - Korean TV shows
 export async function fetchKDramas(page: number = 1): Promise<Movie[]> {
   const res = await fetch(`${TMDB_BASE_URL}/discover/tv?api_key=${API_KEY}&with_original_language=ko&page=${page}&sort_by=popularity.desc`);
   const data = await res.json();
   return data.results || [];
 }
 
-// C-Dramas - Chinese TV shows
 export async function fetchCDramas(page: number = 1): Promise<Movie[]> {
   const res = await fetch(`${TMDB_BASE_URL}/discover/tv?api_key=${API_KEY}&with_original_language=zh&page=${page}&sort_by=popularity.desc`);
   const data = await res.json();
   return data.results || [];
 }
 
-// Documentaries
 export async function fetchDocumentaries(page: number = 1): Promise<Movie[]> {
   const res = await fetch(`${TMDB_BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=99&page=${page}&sort_by=popularity.desc`);
   const data = await res.json();
@@ -188,31 +183,33 @@ export function getImageUrl(path: string | null, size: string = 'w500'): string 
   return `${TMDB_IMAGE_BASE}/${size}${path}`;
 }
 
-/** VidLink.pro movie embed — requires TMDB id (not IMDB) */
+/** VidLink.pro movie embed — Netflix-style theme, TMDB id required */
 export function getVidLinkMovieUrl(tmdbId: string | number): string {
   const url = new URL(`https://vidlink.pro/movie/${tmdbId}`);
   url.searchParams.set('primaryColor', 'e50914');
-  url.searchParams.set('secondaryColor', '170000');
-  url.searchParams.set('iconColor', 'e50914');
+  url.searchParams.set('secondaryColor', '141414');
+  url.searchParams.set('iconColor', 'ffffff');
+  url.searchParams.set('icons', 'default');
   url.searchParams.set('title', 'false');
   url.searchParams.set('poster', 'true');
   url.searchParams.set('autoplay', 'true');
   return url.toString();
 }
 
-/** VidLink.pro TV embed — requires TMDB id + season + episode */
+/** VidLink.pro TV embed */
 export function getVidLinkTVUrl(tmdbId: number, season: number, episode: number): string {
   const url = new URL(`https://vidlink.pro/tv/${tmdbId}/${season}/${episode}`);
   url.searchParams.set('primaryColor', 'e50914');
-  url.searchParams.set('secondaryColor', '170000');
-  url.searchParams.set('iconColor', 'e50914');
+  url.searchParams.set('secondaryColor', '141414');
+  url.searchParams.set('iconColor', 'ffffff');
+  url.searchParams.set('icons', 'default');
   url.searchParams.set('title', 'false');
   url.searchParams.set('poster', 'true');
   url.searchParams.set('autoplay', 'true');
   return url.toString();
 }
 
-/** @deprecated Use getVidLinkMovieUrl with TMDB id */
+/** @deprecated Use getVidLinkMovieUrl */
 export function getVidApiMovieUrl(id: string): string {
   return getVidLinkMovieUrl(id);
 }
