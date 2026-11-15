@@ -63,6 +63,7 @@ export default function MoviePage() {
       media_type: 'movie',
       vote_average: movie.vote_average,
     });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const toggleWatchlist = () => {
@@ -82,29 +83,49 @@ export default function MoviePage() {
 
   return (
     <motion.div className="min-h-screen bg-dark" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <div className="relative h-[50vh] sm:h-[60vh]">
-        <img
-          src={getImageUrl(movie.backdrop_path, 'original')}
-          alt={title}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/60 to-dark/20" />
-        <div className="absolute inset-0 bg-gradient-to-r from-dark via-transparent to-transparent" />
-        <Link
-          to="/"
-          className="absolute top-20 left-4 sm:left-8 z-10 flex items-center gap-2 px-3 py-2 rounded-full bg-black/40 backdrop-blur text-white/80 hover:text-white text-sm"
-        >
-          <ArrowLeft size={16} /> Back
-        </Link>
-      </div>
+      {playing && (
+        <section className="pt-16 sm:pt-20 bg-black">
+          <div className="w-full max-w-[1920px] mx-auto">
+            <div className="w-full aspect-video bg-black">
+              <VideoPlayer
+                src={embedUrl}
+                title={title}
+                tmdbId={movie.id.toString()}
+                mediaType="movie"
+                sources={DEFAULT_SOURCES}
+              />
+            </div>
+          </div>
+        </section>
+      )}
 
-      <div className="relative -mt-32 sm:-mt-40 px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto pb-16">
-        <div className="flex flex-col md:flex-row gap-8">
+      {!playing && (
+        <div className="relative h-[50vh] sm:h-[60vh]">
           <img
-            src={getImageUrl(movie.poster_path, 'w500')}
+            src={getImageUrl(movie.backdrop_path, 'original')}
             alt={title}
-            className="w-40 sm:w-52 rounded-xl shadow-2xl ring-1 ring-white/10 flex-shrink-0 mx-auto md:mx-0"
+            className="w-full h-full object-cover"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/60 to-dark/20" />
+          <div className="absolute inset-0 bg-gradient-to-r from-dark via-transparent to-transparent" />
+          <Link
+            to="/"
+            className="absolute top-20 left-4 sm:left-8 z-10 flex items-center gap-2 px-3 py-2 rounded-full bg-black/40 backdrop-blur text-white/80 hover:text-white text-sm"
+          >
+            <ArrowLeft size={16} /> Back
+          </Link>
+        </div>
+      )}
+
+      <div className={`relative px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto pb-16 ${playing ? 'pt-8' : '-mt-32 sm:-mt-40'}`}>
+        <div className="flex flex-col md:flex-row gap-8">
+          {!playing && (
+            <img
+              src={getImageUrl(movie.poster_path, 'w500')}
+              alt={title}
+              className="w-40 sm:w-52 rounded-xl shadow-2xl ring-1 ring-white/10 flex-shrink-0 mx-auto md:mx-0"
+            />
+          )}
 
           <div className="flex-1">
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2" style={{ fontFamily: "'Outfit', sans-serif" }}>
@@ -142,12 +163,14 @@ export default function MoviePage() {
             <p className="text-white/70 text-sm leading-relaxed mb-6 max-w-2xl">{movie.overview}</p>
 
             <div className="flex flex-wrap gap-3">
-              <button
-                onClick={handlePlay}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-primary to-primary-dark text-white font-semibold text-sm shadow-lg shadow-primary/30"
-              >
-                <Play size={18} fill="white" /> Watch Now
-              </button>
+              {!playing && (
+                <button
+                  onClick={handlePlay}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-primary to-primary-dark text-white font-semibold text-sm shadow-lg shadow-primary/30 hover:scale-105 transition-transform"
+                >
+                  <Play size={18} fill="white" /> Watch Now
+                </button>
+              )}
               <button
                 onClick={toggleWatchlist}
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-white/5 border border-white/10 text-white text-sm hover:bg-white/10"
@@ -167,24 +190,6 @@ export default function MoviePage() {
             </div>
           </div>
         </div>
-
-        {playing && (
-          <motion.section
-            className="mt-10"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <div className="aspect-video rounded-xl overflow-hidden bg-black ring-1 ring-white/10">
-              <VideoPlayer
-                src={embedUrl}
-                title={title}
-                tmdbId={movie.id.toString()}
-                mediaType="movie"
-                sources={DEFAULT_SOURCES}
-              />
-            </div>
-          </motion.section>
-        )}
 
         {cast.length > 0 && (
           <motion.section className="mt-12" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
