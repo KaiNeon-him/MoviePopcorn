@@ -1,7 +1,7 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, User as UserIcon, Eye, EyeOff, ArrowRight, Check, X, Sparkles, Github, Chrome } from 'lucide-react';
+import { Mail, Lock, User as UserIcon, Eye, EyeOff, ArrowRight, Check, X, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Logo from '../components/Logo';
 
@@ -12,7 +12,6 @@ export default function AuthPage() {
   const location = useLocation();
   const { login, signup, user } = useAuth();
   
-  // Redirect if already logged in
   useEffect(() => {
     if (user) {
       navigate('/', { replace: true });
@@ -25,7 +24,6 @@ export default function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  // Form fields
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,11 +32,8 @@ export default function AuthPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-
-  // Field focus states for animations
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  // Password strength
   const getPasswordStrength = (pwd: string): { score: number; label: string; color: string } => {
     let score = 0;
     if (pwd.length >= 8) score++;
@@ -46,7 +41,6 @@ export default function AuthPage() {
     if (/[A-Z]/.test(pwd)) score++;
     if (/[0-9]/.test(pwd)) score++;
     if (/[^A-Za-z0-9]/.test(pwd)) score++;
-    
     if (score <= 1) return { score, label: 'Weak', color: 'bg-red-500' };
     if (score <= 2) return { score, label: 'Fair', color: 'bg-orange-500' };
     if (score <= 3) return { score, label: 'Good', color: 'bg-yellow-500' };
@@ -56,7 +50,6 @@ export default function AuthPage() {
 
   const passwordStrength = getPasswordStrength(password);
 
-  // Validation
   const validations = {
     name: name.trim().length >= 2,
     email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
@@ -88,8 +81,8 @@ export default function AuthPage() {
     
     try {
       const result = mode === 'login' 
-        ? await login(email, password)
-        : await signup(name, email, password);
+        ? await login(email, password, rememberMe)
+        : await signup(name, email, password, rememberMe);
       
       if (result.success) {
         setSuccess(true);
@@ -99,7 +92,7 @@ export default function AuthPage() {
       } else {
         setError(result.error || 'Something went wrong');
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred');
     } finally {
       setIsSubmitting(false);
@@ -115,73 +108,29 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-dark flex">
-      {/* Animated background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {/* Gradient orbs */}
         <motion.div
           className="absolute top-1/4 -left-32 w-96 h-96 bg-primary/20 rounded-full blur-3xl"
-          animate={{
-            x: [0, 100, 0],
-            y: [0, 50, 0],
-            scale: [1, 1.2, 1],
-          }}
+          animate={{ x: [0, 100, 0], y: [0, 50, 0], scale: [1, 1.2, 1] }}
           transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
           className="absolute bottom-1/4 -right-32 w-96 h-96 bg-gold/10 rounded-full blur-3xl"
-          animate={{
-            x: [0, -100, 0],
-            y: [0, -50, 0],
-            scale: [1, 1.3, 1],
-          }}
+          animate={{ x: [0, -100, 0], y: [0, -50, 0], scale: [1, 1.3, 1] }}
           transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.1, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
+          animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
           transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
         />
-
-        {/* Floating particles */}
-        {[...Array(15)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              background: i % 3 === 0 ? '#e50914' : i % 3 === 1 ? '#f5c518' : '#ffffff',
-            }}
-            animate={{
-              y: [0, -100, 0],
-              x: [0, Math.random() * 50 - 25, 0],
-              opacity: [0, 0.6, 0],
-              scale: [0, 1, 0],
-            }}
-            transition={{
-              duration: 5 + Math.random() * 5,
-              repeat: Infinity,
-              delay: Math.random() * 5,
-              ease: 'easeInOut',
-            }}
-          />
-        ))}
       </div>
 
-      {/* Left panel - Branding (hidden on mobile) */}
       <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12">
         <div className="max-w-lg">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <Logo size="lg" />
           </motion.div>
-          
           <motion.h1
             className="mt-8 text-5xl font-bold text-white leading-tight"
             style={{ fontFamily: "'Outfit', sans-serif" }}
@@ -189,11 +138,8 @@ export default function AuthPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            {mode === 'login' 
-              ? 'Welcome back to your movie universe'
-              : 'Start your cinematic journey'}
+            {mode === 'login' ? 'Welcome back to your movie universe' : 'Start your cinematic journey'}
           </motion.h1>
-          
           <motion.p
             className="mt-4 text-lg text-white/60 leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
@@ -204,14 +150,7 @@ export default function AuthPage() {
               ? 'Pick up where you left off. Your watchlist, history, and favorites are waiting.'
               : 'Join millions of movie lovers. Track what you watch, build your watchlist, and discover your next favorite.'}
           </motion.p>
-
-          {/* Feature bullets */}
-          <motion.div
-            className="mt-8 space-y-3"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
+          <motion.div className="mt-8 space-y-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
             {[
               { icon: Sparkles, text: 'Personalized recommendations' },
               { icon: Check, text: 'Save your watchlist across devices' },
@@ -234,20 +173,12 @@ export default function AuthPage() {
         </div>
       </div>
 
-      {/* Right panel - Form */}
       <div className="flex-1 flex items-center justify-center p-6 sm:p-12 relative z-10">
-        <motion.div
-          className="w-full max-w-md"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          {/* Mobile logo */}
+        <motion.div className="w-full max-w-md" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div className="lg:hidden flex justify-center mb-8">
             <Logo size="md" />
           </div>
 
-          {/* Mode switcher */}
           <div className="flex gap-1 p-1 bg-white/[0.04] border border-white/[0.06] rounded-2xl mb-8">
             {(['login', 'signup'] as Mode[]).map((m) => (
               <button
@@ -269,7 +200,6 @@ export default function AuthPage() {
             ))}
           </div>
 
-          {/* Success state */}
           <AnimatePresence mode="wait">
             {success ? (
               <motion.div
@@ -285,13 +215,7 @@ export default function AuthPage() {
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', stiffness: 200, delay: 0.1 }}
                 >
-                  <motion.div
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ delay: 0.3, duration: 0.5 }}
-                  >
-                    <Check size={36} strokeWidth={3} className="text-white" />
-                  </motion.div>
+                  <Check size={36} strokeWidth={3} className="text-white" />
                 </motion.div>
                 <h2 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: "'Outfit', sans-serif" }}>
                   {mode === 'login' ? 'Welcome Back!' : 'Account Created!'}
@@ -299,26 +223,14 @@ export default function AuthPage() {
                 <p className="text-white/60">Redirecting you to your dashboard...</p>
               </motion.div>
             ) : (
-              <motion.form
-                key="form"
-                onSubmit={handleSubmit}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <h2
-                  className="text-3xl font-bold text-white mb-2"
-                  style={{ fontFamily: "'Outfit', sans-serif" }}
-                >
+              <motion.form key="form" onSubmit={handleSubmit} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <h2 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "'Outfit', sans-serif" }}>
                   {mode === 'login' ? 'Sign in to MoviePopcorn' : 'Create your account'}
                 </h2>
                 <p className="text-white/50 mb-8 text-sm">
-                  {mode === 'login' 
-                    ? 'Enter your credentials to access your account'
-                    : 'Fill in your details to get started'}
+                  {mode === 'login' ? 'Enter your credentials to access your account' : 'Fill in your details to get started'}
                 </p>
 
-                {/* Error message */}
                 <AnimatePresence>
                   {error && (
                     <motion.div
@@ -326,7 +238,6 @@ export default function AuthPage() {
                       initial={{ opacity: 0, y: -10, height: 0 }}
                       animate={{ opacity: 1, y: 0, height: 'auto' }}
                       exit={{ opacity: 0, y: -10, height: 0 }}
-                      transition={{ duration: 0.2 }}
                     >
                       <div className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                         <X size={12} strokeWidth={3} className="text-red-400" />
@@ -336,26 +247,15 @@ export default function AuthPage() {
                   )}
                 </AnimatePresence>
 
-                {/* Name field (signup only) */}
                 <AnimatePresence>
                   {mode === 'signup' && (
-                    <motion.div
-                      className="mb-4"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <label className="block text-xs font-semibold text-white/70 mb-2 uppercase tracking-wider">
-                        Full Name
-                      </label>
-                      <div className={`relative group rounded-xl transition-all duration-300 ${
+                    <motion.div className="mb-4" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
+                      <label className="block text-xs font-semibold text-white/70 mb-2 uppercase tracking-wider">Full Name</label>
+                      <div className={`relative rounded-xl transition-all ${
                         focusedField === 'name' ? 'ring-2 ring-primary/50' : ''
                       } ${name && !validations.name ? 'ring-2 ring-red-500/50' : ''}`}>
                         <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                          <UserIcon size={18} strokeWidth={2} className={`transition-colors ${
-                            focusedField === 'name' ? 'text-primary' : 'text-white/40'
-                          }`} />
+                          <UserIcon size={18} className={focusedField === 'name' ? 'text-primary' : 'text-white/40'} />
                         </div>
                         <input
                           type="text"
@@ -364,35 +264,21 @@ export default function AuthPage() {
                           onFocus={() => setFocusedField('name')}
                           onBlur={() => setFocusedField(null)}
                           placeholder="John Doe"
-                          className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl pl-12 pr-4 py-3.5 text-white placeholder-white/30 focus:outline-none focus:bg-white/[0.06] transition-all"
+                          className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl pl-12 pr-4 py-3.5 text-white placeholder-white/30 focus:outline-none focus:bg-white/[0.06]"
                           autoComplete="name"
                         />
-                        {name && validations.name && (
-                          <motion.div
-                            className="absolute right-4 top-1/2 -translate-y-1/2"
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                          >
-                            <Check size={16} strokeWidth={3} className="text-green-400" />
-                          </motion.div>
-                        )}
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                {/* Email field */}
                 <div className="mb-4">
-                  <label className="block text-xs font-semibold text-white/70 mb-2 uppercase tracking-wider">
-                    Email Address
-                  </label>
-                  <div className={`relative group rounded-xl transition-all duration-300 ${
+                  <label className="block text-xs font-semibold text-white/70 mb-2 uppercase tracking-wider">Email Address</label>
+                  <div className={`relative rounded-xl transition-all ${
                     focusedField === 'email' ? 'ring-2 ring-primary/50' : ''
                   } ${email && !validations.email ? 'ring-2 ring-red-500/50' : ''}`}>
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <Mail size={18} strokeWidth={2} className={`transition-colors ${
-                        focusedField === 'email' ? 'text-primary' : 'text-white/40'
-                      }`} />
+                      <Mail size={18} className={focusedField === 'email' ? 'text-primary' : 'text-white/40'} />
                     </div>
                     <input
                       type="email"
@@ -401,33 +287,19 @@ export default function AuthPage() {
                       onFocus={() => setFocusedField('email')}
                       onBlur={() => setFocusedField(null)}
                       placeholder="you@example.com"
-                      className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl pl-12 pr-4 py-3.5 text-white placeholder-white/30 focus:outline-none focus:bg-white/[0.06] transition-all"
+                      className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl pl-12 pr-4 py-3.5 text-white placeholder-white/30 focus:outline-none focus:bg-white/[0.06]"
                       autoComplete="email"
                     />
-                    {email && validations.email && (
-                      <motion.div
-                        className="absolute right-4 top-1/2 -translate-y-1/2"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                      >
-                        <Check size={16} strokeWidth={3} className="text-green-400" />
-                      </motion.div>
-                    )}
                   </div>
                 </div>
 
-                {/* Password field */}
                 <div className="mb-4">
-                  <label className="block text-xs font-semibold text-white/70 mb-2 uppercase tracking-wider">
-                    Password
-                  </label>
-                  <div className={`relative group rounded-xl transition-all duration-300 ${
+                  <label className="block text-xs font-semibold text-white/70 mb-2 uppercase tracking-wider">Password</label>
+                  <div className={`relative rounded-xl transition-all ${
                     focusedField === 'password' ? 'ring-2 ring-primary/50' : ''
                   } ${password && !validations.password ? 'ring-2 ring-red-500/50' : ''}`}>
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <Lock size={18} strokeWidth={2} className={`transition-colors ${
-                        focusedField === 'password' ? 'text-primary' : 'text-white/40'
-                      }`} />
+                      <Lock size={18} className={focusedField === 'password' ? 'text-primary' : 'text-white/40'} />
                     </div>
                     <input
                       type={showPassword ? 'text' : 'password'}
@@ -436,215 +308,89 @@ export default function AuthPage() {
                       onFocus={() => setFocusedField('password')}
                       onBlur={() => setFocusedField(null)}
                       placeholder="••••••••"
-                      className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl pl-12 pr-12 py-3.5 text-white placeholder-white/30 focus:outline-none focus:bg-white/[0.06] transition-all"
+                      className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl pl-12 pr-12 py-3.5 text-white placeholder-white/30 focus:outline-none focus:bg-white/[0.06]"
                       autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
-                    >
-                      {showPassword ? <EyeOff size={18} strokeWidth={2} /> : <Eye size={18} strokeWidth={2} />}
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-
-                  {/* Password strength indicator (signup only) */}
-                  {mode === 'signup' && password.length > 0 && (
-                    <motion.div
-                      className="mt-3"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                    >
-                      <div className="flex gap-1 mb-1.5">
-                        {[1, 2, 3, 4, 5].map((level) => (
-                          <div
-                            key={level}
-                            className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                              level <= passwordStrength.score ? passwordStrength.color : 'bg-white/10'
-                            }`}
-                          />
+                  {mode === 'signup' && password && (
+                    <div className="mt-2">
+                      <div className="flex gap-1 mb-1">
+                        {[1, 2, 3, 4, 5].map((i) => (
+                          <div key={i} className={`h-1 flex-1 rounded-full ${i <= passwordStrength.score ? passwordStrength.color : 'bg-white/10'}`} />
                         ))}
                       </div>
-                      <p className="text-xs text-white/50">
-                        Password strength: <span className={`font-semibold ${
-                          passwordStrength.score <= 1 ? 'text-red-400' :
-                          passwordStrength.score <= 2 ? 'text-orange-400' :
-                          passwordStrength.score <= 3 ? 'text-yellow-400' :
-                          'text-green-400'
-                        }`}>{passwordStrength.label}</span>
-                      </p>
-                    </motion.div>
-                  )}
-                </div>
-
-                {/* Confirm password (signup only) */}
-                <AnimatePresence>
-                  {mode === 'signup' && (
-                    <motion.div
-                      className="mb-4"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <label className="block text-xs font-semibold text-white/70 mb-2 uppercase tracking-wider">
-                        Confirm Password
-                      </label>
-                      <div className={`relative group rounded-xl transition-all duration-300 ${
-                        focusedField === 'confirmPassword' ? 'ring-2 ring-primary/50' : ''
-                      } ${confirmPassword && !validations.confirmPassword ? 'ring-2 ring-red-500/50' : ''}`}>
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                          <Lock size={18} strokeWidth={2} className={`transition-colors ${
-                            focusedField === 'confirmPassword' ? 'text-primary' : 'text-white/40'
-                          }`} />
-                        </div>
-                        <input
-                          type={showConfirmPassword ? 'text' : 'password'}
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          onFocus={() => setFocusedField('confirmPassword')}
-                          onBlur={() => setFocusedField(null)}
-                          placeholder="••••••••"
-                          className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl pl-12 pr-12 py-3.5 text-white placeholder-white/30 focus:outline-none focus:bg-white/[0.06] transition-all"
-                          autoComplete="new-password"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
-                        >
-                          {showConfirmPassword ? <EyeOff size={18} strokeWidth={2} /> : <Eye size={18} strokeWidth={2} />}
-                        </button>
-                      </div>
-                      {confirmPassword && validations.confirmPassword && (
-                        <motion.p
-                          className="mt-2 text-xs text-green-400 flex items-center gap-1.5"
-                          initial={{ opacity: 0, y: -5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                        >
-                          <Check size={12} strokeWidth={3} />
-                          Passwords match
-                        </motion.p>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Remember me / Forgot password (login) OR Terms (signup) */}
-                <div className="mb-6">
-                  {mode === 'login' ? (
-                    <div className="flex items-center justify-between">
-                      <label className="flex items-center gap-2.5 cursor-pointer group">
-                        <div
-                          onClick={() => setRememberMe(!rememberMe)}
-                          className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
-                            rememberMe
-                              ? 'bg-primary border-primary'
-                              : 'border-white/20 group-hover:border-white/40'
-                          }`}
-                        >
-                          {rememberMe && <Check size={12} strokeWidth={3} className="text-white" />}
-                        </div>
-                        <span className="text-sm text-white/60 group-hover:text-white/80 transition-colors">
-                          Remember me
-                        </span>
-                      </label>
-                      <a href="#" className="text-sm text-primary hover:text-primary/80 transition-colors font-medium">
-                        Forgot password?
-                      </a>
+                      <p className="text-xs text-white/40">{passwordStrength.label}</p>
                     </div>
-                  ) : (
-                    <label className="flex items-start gap-2.5 cursor-pointer group">
-                      <div
-                        onClick={() => setAgreedToTerms(!agreedToTerms)}
-                        className={`w-5 h-5 mt-0.5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0 ${
-                          agreedToTerms
-                            ? 'bg-primary border-primary'
-                            : 'border-white/20 group-hover:border-white/40'
-                        }`}
-                      >
-                        {agreedToTerms && <Check size={12} strokeWidth={3} className="text-white" />}
-                      </div>
-                      <span className="text-sm text-white/60 group-hover:text-white/80 transition-colors leading-relaxed">
-                        I agree to the <a href="#" className="text-primary hover:underline">Terms of Service</a> and <a href="#" className="text-primary hover:underline">Privacy Policy</a>
-                      </span>
-                    </label>
                   )}
                 </div>
 
-                {/* Submit button */}
-                <motion.button
-                  type="submit"
-                  disabled={isSubmitting || success}
-                  className="group relative w-full py-4 rounded-xl bg-gradient-to-r from-primary to-primary-dark text-white font-semibold text-sm overflow-hidden shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                  whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
-                  whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
-                >
-                  <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-                  <span className="relative z-10 flex items-center justify-center gap-2">
-                    {isSubmitting ? (
-                      <>
-                        <motion.div
-                          className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                        />
-                        <span>{mode === 'login' ? 'Signing in...' : 'Creating account...'}</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>{mode === 'login' ? 'Sign In' : 'Create Account'}</span>
-                        <ArrowRight size={18} strokeWidth={2.5} className="group-hover:translate-x-1 transition-transform" />
-                      </>
-                    )}
-                  </span>
-                </motion.button>
-
-                {/* Divider */}
-                <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-white/[0.06]" />
+                {mode === 'signup' && (
+                  <div className="mb-4">
+                    <label className="block text-xs font-semibold text-white/70 mb-2 uppercase tracking-wider">Confirm Password</label>
+                    <div className={`relative rounded-xl transition-all ${
+                      focusedField === 'confirm' ? 'ring-2 ring-primary/50' : ''
+                    } ${confirmPassword && !validations.confirmPassword ? 'ring-2 ring-red-500/50' : ''}`}>
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <Lock size={18} className={focusedField === 'confirm' ? 'text-primary' : 'text-white/40'} />
+                      </div>
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        onFocus={() => setFocusedField('confirm')}
+                        onBlur={() => setFocusedField(null)}
+                        placeholder="••••••••"
+                        className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl pl-12 pr-12 py-3.5 text-white placeholder-white/30 focus:outline-none focus:bg-white/[0.06]"
+                        autoComplete="new-password"
+                      />
+                      <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
+                        {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
                   </div>
-                  <div className="relative flex justify-center">
-                    <span className="px-3 bg-dark text-xs text-white/40 uppercase tracking-wider font-medium">
-                      Or continue with
-                    </span>
-                  </div>
-                </div>
+                )}
 
-                {/* Social login buttons */}
-                <div className="grid grid-cols-2 gap-3">
-                  <motion.button
-                    type="button"
-                    className="flex items-center justify-center gap-2 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/70 hover:bg-white/[0.08] hover:border-white/[0.15] hover:text-white transition-all duration-300 text-sm font-medium"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Chrome size={18} strokeWidth={2} />
-                    <span>Google</span>
-                  </motion.button>
-                  <motion.button
-                    type="button"
-                    className="flex items-center justify-center gap-2 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/70 hover:bg-white/[0.08] hover:border-white/[0.15] hover:text-white transition-all duration-300 text-sm font-medium"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Github size={18} strokeWidth={2} />
-                    <span>GitHub</span>
-                  </motion.button>
-                </div>
-
-                {/* Switch mode link */}
-                <p className="mt-8 text-center text-sm text-white/50">
-                  {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
-                  <button
-                    type="button"
-                    onClick={() => switchMode(mode === 'login' ? 'signup' : 'login')}
-                    className="text-primary hover:text-primary/80 font-semibold transition-colors"
-                  >
-                    {mode === 'login' ? 'Sign up' : 'Sign in'}
+                <div className="flex items-center justify-between mb-6">
+                  <button type="button" onClick={() => setRememberMe(!rememberMe)} className="flex items-center gap-2 text-sm text-white/60 hover:text-white">
+                    <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${
+                      rememberMe ? 'bg-primary border-primary' : 'border-white/30'
+                    }`}>
+                      {rememberMe && <Check size={12} strokeWidth={3} className="text-white" />}
+                    </div>
+                    Remember me
                   </button>
-                </p>
+                  {mode === 'login' && (
+                    <span className="text-sm text-white/40">Forgot password? (coming soon)</span>
+                  )}
+                </div>
+
+                {mode === 'signup' && (
+                  <button type="button" onClick={() => setAgreedToTerms(!agreedToTerms)} className="flex items-start gap-2 mb-6 text-sm text-white/60">
+                    <div className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 ${
+                      agreedToTerms ? 'bg-primary border-primary' : 'border-white/30'
+                    }`}>
+                      {agreedToTerms && <Check size={12} strokeWidth={3} className="text-white" />}
+                    </div>
+                    <span>
+                      I agree to the{' '}
+                      <Link to="/terms" className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>Terms</Link>
+                      {' '}and{' '}
+                      <Link to="/privacy" className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>Privacy Policy</Link>
+                    </span>
+                  </button>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-primary to-primary-dark text-white font-semibold flex items-center justify-center gap-2 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/35 transition-all disabled:opacity-60"
+                >
+                  {isSubmitting ? 'Please wait...' : mode === 'login' ? 'Sign In' : 'Create Account'}
+                  {!isSubmitting && <ArrowRight size={18} />}
+                </button>
               </motion.form>
             )}
           </AnimatePresence>
