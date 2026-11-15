@@ -188,12 +188,38 @@ export function getImageUrl(path: string | null, size: string = 'w500'): string 
   return `${TMDB_IMAGE_BASE}/${size}${path}`;
 }
 
-export function getVidApiMovieUrl(imdbId: string): string {
-  return `https://vaplayer.ru/embed/movie/${imdbId}`;
+/** VidLink.pro movie embed — requires TMDB id (not IMDB) */
+export function getVidLinkMovieUrl(tmdbId: string | number): string {
+  const url = new URL(`https://vidlink.pro/movie/${tmdbId}`);
+  url.searchParams.set('primaryColor', 'e50914');
+  url.searchParams.set('secondaryColor', '170000');
+  url.searchParams.set('iconColor', 'e50914');
+  url.searchParams.set('title', 'false');
+  url.searchParams.set('poster', 'true');
+  url.searchParams.set('autoplay', 'true');
+  return url.toString();
 }
 
+/** VidLink.pro TV embed — requires TMDB id + season + episode */
+export function getVidLinkTVUrl(tmdbId: number, season: number, episode: number): string {
+  const url = new URL(`https://vidlink.pro/tv/${tmdbId}/${season}/${episode}`);
+  url.searchParams.set('primaryColor', 'e50914');
+  url.searchParams.set('secondaryColor', '170000');
+  url.searchParams.set('iconColor', 'e50914');
+  url.searchParams.set('title', 'false');
+  url.searchParams.set('poster', 'true');
+  url.searchParams.set('autoplay', 'true');
+  return url.toString();
+}
+
+/** @deprecated Use getVidLinkMovieUrl with TMDB id */
+export function getVidApiMovieUrl(id: string): string {
+  return getVidLinkMovieUrl(id);
+}
+
+/** @deprecated Use getVidLinkTVUrl */
 export function getVidApiTVUrl(tmdbId: number, season: number, episode: number): string {
-  return `https://vaplayer.ru/embed/tv/${tmdbId}/${season}/${episode}`;
+  return getVidLinkTVUrl(tmdbId, season, episode);
 }
 
 export const GENRES: Record<number, string> = {
