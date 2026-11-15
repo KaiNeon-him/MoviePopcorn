@@ -82,7 +82,6 @@ export default function MoviePage() {
 
   return (
     <motion.div className="min-h-screen bg-dark" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      {/* Backdrop */}
       <div className="relative h-[50vh] sm:h-[60vh]">
         <img
           src={getImageUrl(movie.backdrop_path, 'original')}
@@ -179,7 +178,6 @@ export default function MoviePage() {
               <VideoPlayer
                 src={embedUrl}
                 title={title}
-                imdbId={movie.imdb_id}
                 tmdbId={movie.id.toString()}
                 mediaType="movie"
                 sources={DEFAULT_SOURCES}
