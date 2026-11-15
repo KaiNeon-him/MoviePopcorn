@@ -92,46 +92,16 @@ export default function TVPage() {
 
   return (
     <motion.div className="min-h-screen bg-dark" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <div className="relative h-[45vh] sm:h-[55vh]">
-        <img src={getImageUrl(show.backdrop_path, 'original')} alt={title} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/60 to-dark/20" />
-        <Link to="/" className="absolute top-20 left-4 sm:left-8 z-10 flex items-center gap-2 px-3 py-2 rounded-full bg-black/40 backdrop-blur text-white/80 hover:text-white text-sm">
-          <ArrowLeft size={16} /> Back
-        </Link>
-      </div>
-
-      <div className="relative -mt-28 sm:-mt-36 px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto pb-16">
-        <div className="flex flex-col md:flex-row gap-8">
-          <img src={getImageUrl(show.poster_path, 'w500')} alt={title} className="w-36 sm:w-48 rounded-xl shadow-2xl ring-1 ring-white/10 flex-shrink-0 mx-auto md:mx-0" />
-          <div className="flex-1">
-            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2" style={{ fontFamily: "'Outfit', sans-serif" }}>{title}</h1>
-            <div className="flex flex-wrap items-center gap-3 mb-4 text-sm text-white/70">
-              <span className="flex items-center gap-1"><Star size={14} className="text-gold" fill="currentColor" />{show.vote_average.toFixed(1)}</span>
-              {year && <span className="flex items-center gap-1"><Calendar size={14} />{year}</span>}
-              {show.number_of_seasons && <span>{show.number_of_seasons} Season{show.number_of_seasons > 1 ? 's' : ''}</span>}
-            </div>
-            <div className="flex flex-wrap gap-2 mb-5">
-              {show.genres?.map((g) => (
-                <span key={g.id} className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-white/70">{g.name}</span>
-              ))}
-            </div>
-            <p className="text-white/70 text-sm leading-relaxed mb-6 max-w-2xl">{show.overview}</p>
-            <button onClick={toggleWatchlist} className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-white/5 border border-white/10 text-white text-sm hover:bg-white/10">
-              {inWatchlist ? <BookmarkCheck size={16} className="text-primary" /> : <BookmarkPlus size={16} />}
-              {inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
-            </button>
-          </div>
-        </div>
-
-        {showPlayer && selectedEpisode && (
-          <motion.section className="mt-10" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="px-2.5 py-1 rounded-md bg-primary/20 border border-primary/30 text-primary text-xs font-bold">
+      {showPlayer && selectedEpisode && (
+        <section className="pt-16 sm:pt-20 bg-black">
+          <div className="w-full max-w-[1920px] mx-auto">
+            <div className="px-2 sm:px-4 lg:px-6 mb-2 flex items-center gap-2 text-sm text-white/70">
+              <span className="px-2 py-0.5 rounded bg-primary/20 border border-primary/40 text-primary text-xs font-bold">
                 S{selectedEpisode.season_number} E{selectedEpisode.episode_number}
               </span>
-              <span className="text-white font-semibold">{selectedEpisode.name}</span>
+              <span className="font-medium text-white truncate">{selectedEpisode.name}</span>
             </div>
-            <div className="aspect-video rounded-xl overflow-hidden bg-black ring-1 ring-white/10">
+            <div className="w-full aspect-video bg-black">
               <VideoPlayer
                 src={embedUrl}
                 title={`${title} S${selectedEpisode.season_number}E${selectedEpisode.episode_number}`}
@@ -142,20 +112,69 @@ export default function TVPage() {
                 sources={DEFAULT_SOURCES}
               />
             </div>
-          </motion.section>
+          </div>
+        </section>
+      )}
+
+      {!showPlayer && (
+        <div className="relative h-[45vh] sm:h-[55vh]">
+          <img src={getImageUrl(show.backdrop_path, 'original')} alt={title} className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/60 to-dark/20" />
+          <Link to="/" className="absolute top-20 left-4 sm:left-8 z-10 flex items-center gap-2 px-3 py-2 rounded-full bg-black/40 backdrop-blur text-white/80 hover:text-white text-sm">
+            <ArrowLeft size={16} /> Back
+          </Link>
+        </div>
+      )}
+
+      <div className={`relative px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto pb-16 ${showPlayer ? 'pt-8' : '-mt-28 sm:-mt-36'}`}>
+        {!showPlayer && (
+          <div className="flex flex-col md:flex-row gap-8 mb-10">
+            <img src={getImageUrl(show.poster_path, 'w500')} alt={title} className="w-36 sm:w-48 rounded-xl shadow-2xl ring-1 ring-white/10 flex-shrink-0 mx-auto md:mx-0" />
+            <div className="flex-1">
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2" style={{ fontFamily: "'Outfit', sans-serif" }}>{title}</h1>
+              <div className="flex flex-wrap items-center gap-3 mb-4 text-sm text-white/70">
+                <span className="flex items-center gap-1"><Star size={14} className="text-gold" fill="currentColor" />{show.vote_average.toFixed(1)}</span>
+                {year && <span className="flex items-center gap-1"><Calendar size={14} />{year}</span>}
+                {show.number_of_seasons && <span>{show.number_of_seasons} Season{show.number_of_seasons > 1 ? 's' : ''}</span>}
+              </div>
+              <div className="flex flex-wrap gap-2 mb-5">
+                {show.genres?.map((g) => (
+                  <span key={g.id} className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-white/70">{g.name}</span>
+                ))}
+              </div>
+              <p className="text-white/70 text-sm leading-relaxed mb-6 max-w-2xl">{show.overview}</p>
+              <button onClick={toggleWatchlist} className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-white/5 border border-white/10 text-white text-sm hover:bg-white/10">
+                {inWatchlist ? <BookmarkCheck size={16} className="text-primary" /> : <BookmarkPlus size={16} />}
+                {inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
+              </button>
+            </div>
+          </div>
         )}
 
-        <section className="mt-12">
+        {showPlayer && (
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-white" style={{ fontFamily: "'Outfit', sans-serif" }}>{title}</h1>
+              <p className="text-white/50 text-sm mt-0.5">Select another episode below</p>
+            </div>
+            <button onClick={toggleWatchlist} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white text-sm hover:bg-white/10">
+              {inWatchlist ? <BookmarkCheck size={16} className="text-primary" /> : <BookmarkPlus size={16} />}
+              {inWatchlist ? 'In Watchlist' : 'Watchlist'}
+            </button>
+          </div>
+        )}
+
+        <section>
           <h2 className="text-xl font-bold text-white mb-4" style={{ fontFamily: "'Outfit', sans-serif" }}>Episodes</h2>
-          <div className="flex gap-2 overflow-x-auto hide-scrollbar mb-6">
+          <div className="flex gap-2 overflow-x-auto hide-scrollbar mb-6 pb-1">
             {(show.seasons || []).filter((s) => s.season_number > 0).map((s) => (
               <button
                 key={s.id}
                 onClick={() => setSelectedSeason(s.season_number)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
                   selectedSeason === s.season_number
-                    ? 'bg-primary text-white'
-                    : 'bg-white/5 text-white/60 hover:bg-white/10'
+                    ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105'
+                    : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
                 }`}
               >
                 Season {s.season_number}
@@ -163,29 +182,52 @@ export default function TVPage() {
             ))}
           </div>
 
-          <div className="space-y-2">
-            {episodes.map((ep) => (
-              <button
-                key={ep.id}
-                onClick={() => handleEpisodeClick(ep)}
-                className={`w-full flex items-center gap-4 p-3 rounded-xl text-left transition-colors ${
-                  selectedEpisode?.id === ep.id ? 'bg-primary/15 border border-primary/30' : 'bg-white/[0.03] hover:bg-white/[0.06] border border-transparent'
-                }`}
-              >
-                <div className="w-28 h-16 rounded-lg overflow-hidden bg-dark-card flex-shrink-0">
-                  {ep.still_path ? (
-                    <img src={getImageUrl(ep.still_path, 'w300')} alt={ep.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white/20"><Play size={20} /></div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">{ep.episode_number}. {ep.name}</p>
-                  <p className="text-xs text-white/40 line-clamp-1 mt-0.5">{ep.overview}</p>
-                </div>
-                <Play size={16} className="text-white/40 flex-shrink-0" />
-              </button>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {episodes.map((ep) => {
+              const active = selectedEpisode?.id === ep.id;
+              return (
+                <button
+                  key={ep.id}
+                  onClick={() => handleEpisodeClick(ep)}
+                  className={`group relative flex gap-3 p-3 rounded-xl text-left transition-all duration-300 ${
+                    active
+                      ? 'bg-primary/15 border border-primary/40 shadow-lg shadow-primary/10'
+                      : 'bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/15 hover:-translate-y-0.5'
+                  }`}
+                >
+                  <div className="relative w-28 sm:w-32 h-16 sm:h-[4.5rem] rounded-lg overflow-hidden bg-dark-card flex-shrink-0">
+                    {ep.still_path ? (
+                      <img
+                        src={getImageUrl(ep.still_path, 'w300')}
+                        alt={ep.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-white/20">
+                        <Play size={22} />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/50 ring-2 ring-white/30 scale-90 group-hover:scale-100 transition-transform">
+                        <Play size={16} className="text-white ml-0.5" fill="white" />
+                      </div>
+                    </div>
+                    <span className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/70 text-[10px] font-bold text-white">
+                      E{ep.episode_number}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0 py-0.5">
+                    <p className={`text-sm font-semibold truncate ${active ? 'text-primary' : 'text-white group-hover:text-primary'} transition-colors`}>
+                      {ep.episode_number}. {ep.name}
+                    </p>
+                    <p className="text-xs text-white/40 line-clamp-2 mt-1 leading-relaxed">{ep.overview || 'No description'}</p>
+                    {ep.runtime ? (
+                      <p className="text-[10px] text-white/30 mt-1.5">{ep.runtime} min</p>
+                    ) : null}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </section>
 
