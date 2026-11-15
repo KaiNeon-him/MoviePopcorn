@@ -1,5 +1,4 @@
-// Video source providers
-// Each provider builds an embed URL from media IDs
+// Video source providers — Netflix-inspired red/black theme for VidLink.pro
 
 export interface VideoSource {
   name: string;
@@ -8,10 +7,9 @@ export interface VideoSource {
 }
 
 /**
- * VidLink.pro — primary embed provider
- * Docs: https://vidlink.pro/
- * Movies: /movie/{tmdbId}
- * TV:     /tv/{tmdbId}/{season}/{episode}
+ * VidLink.pro — primary embed
+ * Theme tuned to Netflix-like red / black chrome
+ * Built-in captions live inside the player UI (CC button)
  */
 const vidlink: VideoSource = {
   name: 'VidLink',
@@ -22,10 +20,10 @@ const vidlink: VideoSource = {
         : `https://vidlink.pro/tv/${id}/${season ?? 1}/${episode ?? 1}`;
 
     const url = new URL(base);
-    // Hex colors without leading #
+    // Netflix-style colors (hex without #)
     url.searchParams.set('primaryColor', 'e50914');
-    url.searchParams.set('secondaryColor', '170000');
-    url.searchParams.set('iconColor', 'e50914');
+    url.searchParams.set('secondaryColor', '141414');
+    url.searchParams.set('iconColor', 'ffffff');
     url.searchParams.set('icons', 'default');
     url.searchParams.set('title', 'false');
     url.searchParams.set('poster', 'true');
