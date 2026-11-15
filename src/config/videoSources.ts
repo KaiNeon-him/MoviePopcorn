@@ -1,34 +1,41 @@
-// Multiple video source providers
-// Each provider has a function to build the embed URL from media IDs
+// Video source providers
+// Each provider builds an embed URL from media IDs
 
 export interface VideoSource {
   name: string;
+  /** Prefer TMDB id — VidLink requires TMDB for movies and TV */
   buildUrl: (id: string, type: 'movie' | 'tv', season?: number, episode?: number) => string;
 }
 
-// VidAPI - Primary source (the one we've been using)
-const vidapi: VideoSource = {
-  name: 'VidAPI',
+/**
+ * VidLink.pro — primary embed provider
+ * Docs: https://vidlink.pro/
+ * Movies: /movie/{tmdbId}
+ * TV:     /tv/{tmdbId}/{season}/{episode}
+ */
+const vidlink: VideoSource = {
+  name: 'VidLink',
   buildUrl: (id, type, season, episode) => {
-    const baseUrl = type === 'movie'
-      ? `https://vaplayer.ru/embed/movie/${id}`
-      : `https://vaplayer.ru/embed/tv/${id}/${season}/${episode}`;
-    
-    const url = new URL(baseUrl);
-    url.searchParams.set('overlay', 'false');
-    url.searchParams.set('primaryColor', '#e50914');
+    const base =
+      type === 'movie'
+        ? `https://vidlink.pro/movie/${id}`
+        : `https://vidlink.pro/tv/${id}/${season ?? 1}/${episode ?? 1}`;
+
+    const url = new URL(base);
+    // Hex colors without leading #
+    url.searchParams.set('primaryColor', 'e50914');
+    url.searchParams.set('secondaryColor', '170000');
+    url.searchParams.set('iconColor', 'e50914');
+    url.searchParams.set('icons', 'default');
+    url.searchParams.set('title', 'false');
+    url.searchParams.set('poster', 'true');
+    url.searchParams.set('autoplay', 'true');
     return url.toString();
-  }
+  },
 };
 
-// Default sources list - currently only VidAPI works reliably
-// Other sources (VidSrc, 2Embed, SuperEmbed, MoviesAPI) are blocked by browsers
-// Users can add more sources here if they find working alternatives
-export const DEFAULT_SOURCES: VideoSource[] = [
-  vidapi,
-];
+export const DEFAULT_SOURCES: VideoSource[] = [vidlink];
 
-// Helper to get source by name
 export function getSourceByName(name: string): VideoSource | undefined {
-  return DEFAULT_SOURCES.find(s => s.name === name);
+  return DEFAULT_SOURCES.find((s) => s.name === name);
 }
