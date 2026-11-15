@@ -9,9 +9,10 @@ interface MovieRowProps {
   movies: Movie[];
   mediaType?: 'movie' | 'tv';
   icon?: string;
+  showRank?: boolean;
 }
 
-export default function MovieRow({ title, movies, mediaType, icon }: MovieRowProps) {
+export default function MovieRow({ title, movies, mediaType, icon, showRank = false }: MovieRowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -28,18 +29,18 @@ export default function MovieRow({ title, movies, mediaType, icon }: MovieRowPro
 
   return (
     <motion.section
-      className="py-6 relative group/row"
-      initial={{ opacity: 0, y: 40 }}
+      className="py-5 relative group/row"
+      initial={{ opacity: 0, y: 32 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-100px' }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once: true, margin: '-80px' }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
     >
       <motion.div
-        className="flex items-center gap-3 mb-5 px-4 sm:px-8 lg:px-12"
-        initial={{ opacity: 0, x: -20 }}
+        className="flex items-center gap-3 mb-4 px-4 sm:px-8 lg:px-12"
+        initial={{ opacity: 0, x: -16 }}
         whileInView={{ opacity: 1, x: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.4 }}
+        transition={{ duration: 0.35 }}
       >
         {icon && <span className="text-xl">{icon}</span>}
         <h2
@@ -48,46 +49,48 @@ export default function MovieRow({ title, movies, mediaType, icon }: MovieRowPro
         >
           {title}
         </h2>
-        <motion.div
-          className="h-px flex-1 max-w-24 bg-gradient-to-r from-white/20 to-transparent rounded-full"
-          initial={{ width: 0 }}
-          whileInView={{ width: 96 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-        />
+        <div className="h-px flex-1 max-w-20 bg-gradient-to-r from-white/15 to-transparent rounded-full" />
       </motion.div>
 
       <div className="relative">
-        {/* Scroll buttons - modern glass style */}
         <motion.button
           onClick={() => scroll('left')}
-          className="absolute left-2 top-0 bottom-0 z-10 w-14 bg-gradient-to-r from-dark to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-300 flex items-center justify-start pl-2"
-          whileHover={{ scale: 1.1 }}
+          className="absolute left-2 top-0 bottom-0 z-10 w-12 bg-gradient-to-r from-dark to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-300 flex items-center justify-start pl-1"
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          aria-label="Scroll left"
         >
-          <div className="p-2.5 rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/[0.1] hover:bg-white/[0.15] hover:border-white/[0.2] transition-all shadow-lg">
+          <div className="p-2 rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/[0.1] hover:bg-white/[0.15]">
             <ChevronLeft size={18} strokeWidth={2.5} className="text-white" />
           </div>
         </motion.button>
         <motion.button
           onClick={() => scroll('right')}
-          className="absolute right-2 top-0 bottom-0 z-10 w-14 bg-gradient-to-l from-dark to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-300 flex items-center justify-end pr-2"
-          whileHover={{ scale: 1.1 }}
+          className="absolute right-2 top-0 bottom-0 z-10 w-12 bg-gradient-to-l from-dark to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-300 flex items-center justify-end pr-1"
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          aria-label="Scroll right"
         >
-          <div className="p-2.5 rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/[0.1] hover:bg-white/[0.15] hover:border-white/[0.2] transition-all shadow-lg">
+          <div className="p-2 rounded-full bg-white/[0.08] backdrop-blur-xl border border-white/[0.1] hover:bg-white/[0.15]">
             <ChevronRight size={18} strokeWidth={2.5} className="text-white" />
           </div>
         </motion.button>
 
-        {/* Scrollable container */}
         <div
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto hide-scrollbar px-4 sm:px-8 lg:px-12 pb-4"
+          className="flex gap-3 sm:gap-4 overflow-x-auto hide-scrollbar px-4 sm:px-8 lg:px-12 pb-3"
         >
           {movies.map((movie, index) => (
-            <div key={movie.id} className="flex-shrink-0 w-[150px] sm:w-[180px] md:w-[200px]">
-              <MovieCard movie={movie} mediaType={mediaType} index={index} />
+            <div
+              key={`${movie.id}-${index}`}
+              className={`flex-shrink-0 ${showRank ? 'w-[140px] sm:w-[160px] md:w-[180px]' : 'w-[150px] sm:w-[180px] md:w-[200px]'}`}
+            >
+              <MovieCard
+                movie={movie}
+                mediaType={mediaType}
+                index={index}
+                rank={showRank ? index + 1 : undefined}
+              />
             </div>
           ))}
         </div>
