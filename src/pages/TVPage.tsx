@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, Calendar, Play, ArrowLeft, BookmarkPlus, BookmarkCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -34,9 +34,70 @@ export default function TVPage() {
   useEffect(() => {
     if (!id || !show) return;
     fetchSeasonEpisodes(Number(id), selectedSeason).then(setEpisodes);
-    setSelectedEpisode(null);
-    setShowPlayer(false);
   }, [id, selectedSeason, show]);
+
+  const title = show?.name || show?.title || 'Untitled';
+
+  const playEpisode = useCallback(
+    (episode: Episode, opts?: { seasonList?: Episode[] }) => {
+      if (!show) return;
+      setSelectedEpisode(episode);
+      setSelectedSeason(episode.season_number);
+      setShowPlayer(true);
+      addToHistory({
+        id: show.id,
+        title,
+        poster_path: show.poster_path,
+        backdrop_path: show.backdrop_path,
+        media_type: 'tv',
+        vote_average: show.vote_average,
+      });
+      setTimeout(() => {
+        document.getElementById('player-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 80);
+    },
+    [show, title, addToHistory]
+  );
+
+  /** Next episode in current season, or first of next season */
+  const nextEpisodeInfo = useMemo(() => {
+    if (!selectedEpisode || !show) return null;
+    const idx = episodes.findIndex((e) => e.id === selectedEpisode.id);
+    if (idx >= 0 && idx < episodes.length - 1) {
+      return { episode: episodes[idx + 1], needsSeasonFetch: false as const };
+    }
+    // End of season — try next season
+    const seasons = (show.seasons || []).filter((s) => s.season_number > 0);
+    const nextSeason = seasons.find((s) => s.season_number === selectedEpisode.season_number + 1);
+    if (nextSeason) {
+      return {
+        episode: null as Episode | null,
+        needsSeasonFetch: true as const,
+        nextSeasonNumber: nextSeason.season_number,
+      };
+    }
+    return null;
+  }, [selectedEpisode, episodes, show]);
+
+  const hasNextEpisode = Boolean(nextEpisodeInfo);
+
+  const handleNextEpisode = useCallback(async () => {
+    if (!show || !nextEpisodeInfo) return;
+
+    if (!nextEpisodeInfo.needsSeasonFetch && nextEpisodeInfo.episode) {
+      playEpisode(nextEpisodeInfo.episode);
+      return;
+    }
+
+    if (nextEpisodeInfo.needsSeasonFetch && nextEpisodeInfo.nextSeasonNumber) {
+      const nextSeasonEps = await fetchSeasonEpisodes(show.id, nextEpisodeInfo.nextSeasonNumber);
+      if (nextSeasonEps.length > 0) {
+        setSelectedSeason(nextEpisodeInfo.nextSeasonNumber);
+        setEpisodes(nextSeasonEps);
+        playEpisode(nextSeasonEps[0]);
+      }
+    }
+  }, [show, nextEpisodeInfo, playEpisode]);
 
   if (loading) {
     return (
@@ -55,28 +116,11 @@ export default function TVPage() {
     );
   }
 
-  const title = show.name || show.title || 'Untitled';
   const year = show.first_air_date ? new Date(show.first_air_date).getFullYear() : '';
   const inWatchlist = isInWatchlist(show.id, 'tv');
   const embedUrl = selectedEpisode
     ? getVidLinkTVUrl(show.id, selectedEpisode.season_number, selectedEpisode.episode_number)
     : '';
-
-  const handleEpisodeClick = (episode: Episode) => {
-    setSelectedEpisode(episode);
-    setShowPlayer(true);
-    addToHistory({
-      id: show.id,
-      title,
-      poster_path: show.poster_path,
-      backdrop_path: show.backdrop_path,
-      media_type: 'tv',
-      vote_average: show.vote_average,
-    });
-    setTimeout(() => {
-      document.getElementById('player-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 80);
-  };
 
   const toggleWatchlist = () => {
     if (inWatchlist) removeFromWatchlist(show.id, 'tv');
@@ -141,6 +185,7 @@ export default function TVPage() {
             <div className="rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl shadow-black/40 bg-black">
               <div className="aspect-video w-full">
                 <VideoPlayer
+                  key={`${selectedEpisode.season_number}-${selectedEpisode.episode_number}`}
                   src={embedUrl}
                   title={`${title} S${selectedEpisode.season_number}E${selectedEpisode.episode_number}`}
                   tmdbId={show.id.toString()}
@@ -148,6 +193,8 @@ export default function TVPage() {
                   season={selectedEpisode.season_number}
                   episode={selectedEpisode.episode_number}
                   sources={DEFAULT_SOURCES}
+                  hasNextEpisode={hasNextEpisode}
+                  onNextEpisode={handleNextEpisode}
                 />
               </div>
             </div>
@@ -160,7 +207,10 @@ export default function TVPage() {
             {(show.seasons || []).filter((s) => s.season_number > 0).map((s) => (
               <button
                 key={s.id}
-                onClick={() => setSelectedSeason(s.season_number)}
+                onClick={() => {
+                  setSelectedSeason(s.season_number);
+                  // Keep player on current ep when switching season tabs only if not watching
+                }}
                 className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
                   selectedSeason === s.season_number
                     ? 'bg-primary text-white shadow-lg shadow-primary/30'
@@ -178,7 +228,7 @@ export default function TVPage() {
               return (
                 <button
                   key={ep.id}
-                  onClick={() => handleEpisodeClick(ep)}
+                  onClick={() => playEpisode(ep)}
                   className={`group relative flex gap-3 p-3 rounded-xl text-left transition-all duration-300 ${
                     active
                       ? 'bg-primary/15 border border-primary/40 shadow-lg shadow-primary/10'
