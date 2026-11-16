@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Play, Info, Star, X, MessageSquareQuote } from 'lucide-react';
+import { Play, Info, Star, X, Quote } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Movie,
@@ -249,7 +249,6 @@ export default function Hero() {
               </div>
 
               <div className="overflow-y-auto">
-                {/* Embedded trailer */}
                 <div className="relative w-full aspect-video bg-black">
                   {trailerKey ? (
                     <iframe
@@ -297,7 +296,7 @@ export default function Hero() {
                   {reviewText && (
                     <blockquote className="pl-3 border-l-2 border-primary/40">
                       <p className="text-xs sm:text-sm text-white/55 italic leading-relaxed flex gap-2">
-                        <MessageSquareQuote size={14} className="text-primary/70 shrink-0 mt-0.5" />
+                        <Quote size={14} className="text-primary/70 shrink-0 mt-0.5" />
                         <span>
                           “{reviewText}”
                           <span className="not-italic text-white/35"> — {review?.author}</span>
