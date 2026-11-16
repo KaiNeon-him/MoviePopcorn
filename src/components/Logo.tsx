@@ -7,48 +7,57 @@ interface LogoProps {
 
 export default function Logo({ size = 'md', showText = true }: LogoProps) {
   const sizes = {
-    sm: { icon: 32, text: 'text-lg' },
-    md: { icon: 40, text: 'text-xl' },
-    lg: { icon: 56, text: 'text-2xl' },
+    sm: { icon: 36, text: 'text-xl' },
+    md: { icon: 42, text: 'text-2xl' },
+    lg: { icon: 56, text: 'text-3xl' },
   };
 
   const { icon, text } = sizes[size];
 
   return (
-    <div className="flex items-center gap-2 group cursor-pointer">
-      {/* Popcorn Projector Logo */}
+    <div className="flex items-center gap-2.5 group cursor-pointer">
       <motion.div
-        className="relative"
-        whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
-        transition={{ duration: 0.4 }}
+        className="relative flex-shrink-0"
+        whileHover={{ scale: 1.06 }}
+        transition={{ duration: 0.25 }}
       >
         <img
           src="/logo-popcorn-projector.svg"
-          alt="MoviePopcorn"
+          alt=""
           width={icon}
           height={icon}
-          className="rounded-lg"
+          className="rounded-lg block relative z-10"
+          onError={(e) => {
+            // Fallback if SVG fails to load
+            const el = e.currentTarget;
+            el.style.display = 'none';
+            const fallback = el.nextElementSibling as HTMLElement | null;
+            if (fallback) fallback.style.display = 'flex';
+          }}
         />
-
-        {/* Glow effect */}
-        <motion.div
-          className="absolute inset-0 rounded-full bg-primary/20 blur-xl"
-          animate={{ opacity: [0.3, 0.6, 0.3] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        />
+        <div
+          className="hidden items-center justify-center rounded-lg bg-primary text-white font-black relative z-10"
+          style={{ width: icon, height: icon, fontSize: icon * 0.4 }}
+          aria-hidden
+        >
+          MP
+        </div>
+        <div className="absolute inset-0 rounded-lg bg-primary/25 blur-lg opacity-60 group-hover:opacity-90 transition-opacity" />
       </motion.div>
 
-      {/* Text */}
       {showText && (
-        <motion.span
-          className={`${text} font-black tracking-tight bg-gradient-to-r from-primary via-gold to-primary bg-clip-text text-transparent`}
-          style={{ fontFamily: "'Bebas Neue', cursive" }}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.5, duration: 0.4 }}
+        <span
+          className={`${text} font-black tracking-wide leading-none`}
+          style={{
+            fontFamily: "'Bebas Neue', 'Arial Black', Impact, sans-serif",
+            background: 'linear-gradient(90deg, #e50914 0%, #f5c518 50%, #e50914 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}
         >
           MoviePopcorn
-        </motion.span>
+        </span>
       )}
     </div>
   );
