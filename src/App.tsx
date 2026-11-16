@@ -10,6 +10,7 @@ import SplashScreen from './components/SplashScreen';
 import AdBlockerDetector from './components/AdBlockerDetector';
 import InstallPrompt from './components/InstallPrompt';
 import CookieConsent from './components/CookieConsent';
+import WelcomeBrave from './components/WelcomeBrave';
 import ScrollToTop from './components/ScrollToTop';
 import HomePage from './pages/HomePage';
 import MoviePage from './pages/MoviePage';
@@ -67,6 +68,7 @@ function AppContent() {
       </main>
       {!isAuthPage && <Footer />}
       <AdBlockerDetector />
+      <WelcomeBrave />
       <InstallPrompt />
       <CookieConsent />
     </div>
