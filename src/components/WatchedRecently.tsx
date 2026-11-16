@@ -3,10 +3,13 @@ import { Link } from 'react-router-dom';
 import { Clock, Play, X } from 'lucide-react';
 import { useWatchHistory, WatchedItem } from '../hooks/useWatchHistory';
 import { getImageUrl } from '../api/tmdb';
+import { useSettings } from '../context/SettingsContext';
 
 export default function WatchedRecently() {
   const { history, removeFromHistory } = useWatchHistory();
+  const { settings } = useSettings();
 
+  if (!settings.account.showWatchHistory) return null;
   if (history.length === 0) return null;
 
   const formatTime = (timestamp: number) => {
@@ -14,7 +17,6 @@ export default function WatchedRecently() {
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
-
     if (minutes < 60) return `${minutes}m ago`;
     if (hours < 24) return `${hours}h ago`;
     return `${days}d ago`;
@@ -59,99 +61,55 @@ export default function WatchedRecently() {
 interface WatchedCardProps {
   item: WatchedItem;
   index: number;
-  formatTime: (timestamp: number) => string;
-  onRemove: (id: number, mediaType: 'movie' | 'tv') => void;
+  formatTime: (t: number) => string;
+  onRemove: (id: number, type: 'movie' | 'tv') => void;
 }
 
 function WatchedCard({ item, index, formatTime, onRemove }: WatchedCardProps) {
-  const linkTo = item.media_type === 'tv' ? `/tv/${item.id}` : `/movie/${item.id}`;
+  const link = item.media_type === 'tv' ? `/tv/${item.id}` : `/movie/${item.id}`;
+  const title = item.title || 'Untitled';
 
   return (
     <motion.div
-      className="flex-shrink-0 w-[280px] sm:w-[320px] group"
-      initial={{ opacity: 0, x: 30 }}
-      whileInView={{ opacity: 1, x: 0 }}
+      className="relative flex-shrink-0 w-[150px] sm:w-[170px] group"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: index * 0.1 }}
+      transition={{ delay: Math.min(index * 0.05, 0.3) }}
     >
-      <Link to={linkTo} className="block relative rounded-2xl overflow-hidden bg-dark-card ring-1 ring-white/[0.06] hover:ring-white/[0.12] shadow-lg shadow-black/20 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500">
-        {/* Backdrop image */}
-        <div className="aspect-video relative overflow-hidden">
-          <motion.img
-            src={item.poster_path ? getImageUrl(item.poster_path, 'w500') : 'https://via.placeholder.com/500x750/1a1a2e/666?text=No+Image'}
-            alt={item.title}
-            className="w-full h-full object-cover"
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      <Link to={link} className="block">
+        <div className="relative aspect-[2/3] rounded-xl overflow-hidden ring-1 ring-white/[0.08] group-hover:ring-white/20 transition-all">
+          <img
+            src={getImageUrl(item.poster_path, 'w300')}
+            alt={title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
-          {/* Dark overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-          
-          {/* Play icon - modern circular */}
-          <motion.div
-            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          >
-            <div className="relative">
-              <div className="absolute inset-0 rounded-full bg-primary/40 blur-xl scale-150" />
-              <motion.div
-                className="relative w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg shadow-primary/40 ring-2 ring-white/20"
-                whileHover={{ scale: 1.1 }}
-              >
-                <Play size={18} className="text-white ml-0.5" fill="white" strokeWidth={2.5} />
-              </motion.div>
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+              <Play size={16} className="text-white ml-0.5" fill="white" />
             </div>
-          </motion.div>
-
-          {/* Remove button - modern icon button */}
-          <motion.button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onRemove(item.id, item.media_type);
-            }}
-            className="absolute top-3 right-3 p-2 rounded-full bg-black/60 backdrop-blur-md border border-white/[0.1] opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-black/80 hover:border-white/[0.2]"
-            whileHover={{ scale: 1.15 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <X size={14} strokeWidth={2.5} className="text-white/80" />
-          </motion.button>
-
-          {/* Progress bar */}
-          {item.progress !== undefined && (
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
-              <motion.div
-                className="h-full bg-gradient-to-r from-primary to-gold rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${item.progress}%` }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-              />
+          </div>
+          {item.progress !== undefined && item.progress > 0 && (
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+              <div className="h-full bg-primary" style={{ width: `${Math.min(item.progress, 100)}%` }} />
             </div>
           )}
-
-          {/* Time info */}
-          <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/[0.08] text-xs text-white/70 font-medium">
-              <Clock size={11} strokeWidth={2.5} />
-              {formatTime(item.watchedAt)}
-            </span>
-            {item.season && item.episode && (
-              <span className="px-2.5 py-1 rounded-md bg-primary/20 border border-primary/30 text-primary text-xs font-bold">
-                S{item.season}E{item.episode}
-              </span>
-            )}
-          </div>
         </div>
-
-        {/* Title */}
-        <div className="p-3.5">
-          <h3 className="text-[13px] font-semibold text-white truncate group-hover:text-primary transition-colors duration-300 leading-tight">
-            {item.title}
-          </h3>
-          <p className="text-[11px] text-white/40 mt-1.5 uppercase font-medium tracking-wide">
-            {item.media_type === 'tv' ? 'TV Show' : 'Movie'}
-          </p>
-        </div>
+        <p className="mt-2 text-xs font-medium text-white truncate">{title}</p>
+        <p className="text-[10px] text-white/40 flex items-center gap-1">
+          <Clock size={10} /> {formatTime(item.watchedAt || Date.now())}
+        </p>
       </Link>
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          onRemove(item.id, item.media_type);
+        }}
+        className="absolute top-2 right-2 p-1 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity"
+        aria-label="Remove"
+      >
+        <X size={12} className="text-white" />
+      </button>
     </motion.div>
   );
 }
