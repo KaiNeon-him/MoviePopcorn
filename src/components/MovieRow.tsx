@@ -1,8 +1,9 @@
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Movie } from '../api/tmdb';
 import MovieCard from './MovieCard';
+import { useSettings } from '../context/SettingsContext';
 
 interface MovieRowProps {
   title: string;
@@ -14,6 +15,16 @@ interface MovieRowProps {
 
 export default function MovieRow({ title, movies, mediaType, icon, showRank = false }: MovieRowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { settings } = useSettings();
+
+  const visible = useMemo(() => {
+    if (!movies?.length) return [];
+    if (!settings.parentalControls.enabled) return movies;
+    if (!settings.parentalControls.matureContent) {
+      return movies.filter((m) => !m.adult);
+    }
+    return movies;
+  }, [movies, settings.parentalControls.enabled, settings.parentalControls.matureContent]);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -25,15 +36,15 @@ export default function MovieRow({ title, movies, mediaType, icon, showRank = fa
     }
   };
 
-  if (!movies || movies.length === 0) return null;
+  if (!visible.length) return null;
 
   return (
     <motion.section
       className="py-5 relative group/row"
       initial={{ opacity: 0, y: 32 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-80px' }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.45 }}
     >
       <motion.div
         className="flex items-center gap-3 mb-4 px-4 sm:px-8 lg:px-12"
@@ -43,10 +54,7 @@ export default function MovieRow({ title, movies, mediaType, icon, showRank = fa
         transition={{ duration: 0.35 }}
       >
         {icon && <span className="text-xl">{icon}</span>}
-        <h2
-          className="text-lg sm:text-xl font-bold text-white tracking-tight"
-          style={{ fontFamily: "'Outfit', sans-serif" }}
-        >
+        <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>
           {title}
         </h2>
         <div className="h-px flex-1 max-w-20 bg-gradient-to-r from-white/15 to-transparent rounded-full" />
@@ -76,21 +84,13 @@ export default function MovieRow({ title, movies, mediaType, icon, showRank = fa
           </div>
         </motion.button>
 
-        <div
-          ref={scrollRef}
-          className="flex gap-3 sm:gap-4 overflow-x-auto hide-scrollbar px-4 sm:px-8 lg:px-12 pb-3"
-        >
-          {movies.map((movie, index) => (
+        <div ref={scrollRef} className="flex gap-3 sm:gap-4 overflow-x-auto hide-scrollbar px-4 sm:px-8 lg:px-12 pb-3">
+          {visible.map((movie, index) => (
             <div
               key={`${movie.id}-${index}`}
               className={`flex-shrink-0 ${showRank ? 'w-[140px] sm:w-[160px] md:w-[180px]' : 'w-[150px] sm:w-[180px] md:w-[200px]'}`}
             >
-              <MovieCard
-                movie={movie}
-                mediaType={mediaType}
-                index={index}
-                rank={showRank ? index + 1 : undefined}
-              />
+              <MovieCard movie={movie} mediaType={mediaType} index={index} rank={showRank ? index + 1 : undefined} />
             </div>
           ))}
         </div>
