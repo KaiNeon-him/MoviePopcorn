@@ -12,6 +12,7 @@ export interface Movie {
   release_date?: string;
   first_air_date?: string;
   vote_average: number;
+  vote_count?: number;
   genre_ids: number[];
   media_type?: string;
   original_language: string;
@@ -70,6 +71,27 @@ export interface CastMember {
   character: string;
   profile_path: string | null;
   order: number;
+}
+
+export interface TmdbVideo {
+  id: string;
+  key: string;
+  name: string;
+  site: string;
+  type: string;
+  official: boolean;
+  published_at?: string;
+}
+
+export interface TmdbReview {
+  id: string;
+  author: string;
+  content: string;
+  created_at: string;
+  author_details?: {
+    rating?: number | null;
+    username?: string;
+  };
 }
 
 export async function fetchTrending(mediaType: 'movie' | 'tv' | 'all' = 'all', timeWindow: 'day' | 'week' = 'week'): Promise<Movie[]> {
@@ -172,6 +194,33 @@ export async function fetchSeasonEpisodes(tvId: number, seasonNumber: number): P
   const res = await fetch(`${TMDB_BASE_URL}/tv/${tvId}/season/${seasonNumber}?api_key=${API_KEY}`);
   const data = await res.json();
   return data.episodes || [];
+}
+
+/** Prefer official YouTube Trailer, then any YouTube Trailer/Teaser */
+export async function fetchMovieTrailerKey(id: number): Promise<string | null> {
+  const res = await fetch(`${TMDB_BASE_URL}/movie/${id}/videos?api_key=${API_KEY}`);
+  const data = await res.json();
+  const videos: TmdbVideo[] = data.results || [];
+  const yt = videos.filter((v) => v.site === 'YouTube');
+  const officialTrailer = yt.find((v) => v.type === 'Trailer' && v.official);
+  const anyTrailer = yt.find((v) => v.type === 'Trailer');
+  const teaser = yt.find((v) => v.type === 'Teaser');
+  return (officialTrailer || anyTrailer || teaser)?.key ?? null;
+}
+
+/** Short audience review snippet for hero */
+export async function fetchMovieReviewSnippet(id: number): Promise<TmdbReview | null> {
+  const res = await fetch(`${TMDB_BASE_URL}/movie/${id}/reviews?api_key=${API_KEY}&language=en-US&page=1`);
+  const data = await res.json();
+  const reviews: TmdbReview[] = data.results || [];
+  if (!reviews.length) return null;
+  // Prefer reviews with a rating and decent length
+  const ranked = [...reviews].sort((a, b) => {
+    const ar = a.author_details?.rating ?? 0;
+    const br = b.author_details?.rating ?? 0;
+    return br - ar || b.content.length - a.content.length;
+  });
+  return ranked[0] || null;
 }
 
 export async function searchMulti(query: string, page: number = 1): Promise<Movie[]> {
