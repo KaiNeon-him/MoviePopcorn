@@ -16,6 +16,7 @@ export interface Movie {
   media_type?: string;
   original_language: string;
   popularity: number;
+  adult?: boolean;
 }
 
 export interface MovieDetails {
@@ -38,6 +39,7 @@ export interface MovieDetails {
   original_language: string;
   production_companies: { id: number; name: string; logo_path: string | null }[];
   seasons?: Season[];
+  adult?: boolean;
 }
 
 export interface Season {
@@ -183,7 +185,6 @@ export function getImageUrl(path: string | null, size: string = 'w500'): string 
   return `${TMDB_IMAGE_BASE}/${size}${path}`;
 }
 
-/** VidLink.pro movie embed — Netflix-style theme, TMDB id required */
 export function getVidLinkMovieUrl(tmdbId: string | number): string {
   const url = new URL(`https://vidlink.pro/movie/${tmdbId}`);
   url.searchParams.set('primaryColor', 'e50914');
@@ -196,7 +197,6 @@ export function getVidLinkMovieUrl(tmdbId: string | number): string {
   return url.toString();
 }
 
-/** VidLink.pro TV embed */
 export function getVidLinkTVUrl(tmdbId: number, season: number, episode: number): string {
   const url = new URL(`https://vidlink.pro/tv/${tmdbId}/${season}/${episode}`);
   url.searchParams.set('primaryColor', 'e50914');
@@ -209,12 +209,10 @@ export function getVidLinkTVUrl(tmdbId: number, season: number, episode: number)
   return url.toString();
 }
 
-/** @deprecated Use getVidLinkMovieUrl */
 export function getVidApiMovieUrl(id: string): string {
   return getVidLinkMovieUrl(id);
 }
 
-/** @deprecated Use getVidLinkTVUrl */
 export function getVidApiTVUrl(tmdbId: number, season: number, episode: number): string {
   return getVidLinkTVUrl(tmdbId, season, episode);
 }
