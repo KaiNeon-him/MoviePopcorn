@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, RefreshCw, RotateCw, Subtitles } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
@@ -24,6 +24,8 @@ interface VideoPlayerProps {
 
 type PlayerStatus = 'playing' | 'paused' | 'completed' | 'seeked' | 'idle';
 
+const NEXT_COUNTDOWN_SEC = 5;
+
 export default function VideoPlayer({
   src,
   title,
@@ -39,6 +41,7 @@ export default function VideoPlayer({
 }: VideoPlayerProps) {
   const { settings } = useSettings();
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const advancedRef = useRef(false);
   const [currentSourceIndex, setCurrentSourceIndex] = useState(0);
   const [iframeKey, setIframeKey] = useState(0);
   const [playerStatus, setPlayerStatus] = useState<PlayerStatus>('idle');
@@ -47,6 +50,7 @@ export default function VideoPlayer({
   const [quality, setQuality] = useState('');
   const [showStillWatching, setShowStillWatching] = useState(false);
   const [showNextEpisode, setShowNextEpisode] = useState(false);
+  const [nextCountdown, setNextCountdown] = useState<number | null>(null);
   const [showSourceMenu, setShowSourceMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showSubtitleMenu, setShowSubtitleMenu] = useState(false);
@@ -54,7 +58,17 @@ export default function VideoPlayer({
   const [isPortrait, setIsPortrait] = useState(false);
 
   const mediaId = tmdbId || imdbId || '';
-  const progressKey = `moviepopcorn_progress_${mediaId}`;
+  const progressKey = `moviepopcorn_progress_${mediaId}_${season ?? 0}_${episode ?? 0}`;
+
+  // Reset advance guard when episode changes
+  useEffect(() => {
+    advancedRef.current = false;
+    setShowNextEpisode(false);
+    setNextCountdown(null);
+    setPlayerStatus('idle');
+    setCurrentTime(0);
+    setDuration(0);
+  }, [src, season, episode, tmdbId]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -114,30 +128,109 @@ export default function VideoPlayer({
 
   const reloadPlayer = () => setIframeKey((prev) => prev + 1);
 
+  const startNextFlow = useCallback(() => {
+    if (advancedRef.current) return;
+    if (!hasNextEpisode) {
+      setShowNextEpisode(false);
+      return;
+    }
+    advancedRef.current = true;
+    setShowNextEpisode(true);
+
+    if (settings.autoplayNext) {
+      setNextCountdown(NEXT_COUNTDOWN_SEC);
+    }
+  }, [hasNextEpisode, settings.autoplayNext]);
+
+  // Countdown → auto advance
+  useEffect(() => {
+    if (nextCountdown === null) return;
+    if (nextCountdown <= 0) {
+      onNextEpisode?.();
+      setNextCountdown(null);
+      return;
+    }
+    const t = setTimeout(() => setNextCountdown((c) => (c === null ? null : c - 1)), 1000);
+    return () => clearTimeout(t);
+  }, [nextCountdown, onNextEpisode]);
+
+  const cancelAutoNext = () => {
+    setNextCountdown(null);
+    // keep the Next button visible
+  };
+
+  // Listen for player end events (VidLink / generic iframe players)
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type !== 'PLAYER_EVENT') return;
-      const d = event.data.data || {};
-      const status = d.player_status || d.event;
-      const progress = d.player_progress ?? d.currentTime ?? 0;
-      const dur = d.player_duration ?? d.duration ?? 0;
-      if (status === 'play' || status === 'playing') setPlayerStatus('playing');
-      else if (status === 'pause' || status === 'paused') setPlayerStatus('paused');
-      else if (status === 'ended' || status === 'completed') {
-        setPlayerStatus('completed');
-        if (hasNextEpisode && settings.autoplayNext) {
-          setTimeout(() => onNextEpisode?.(), 2000);
+      const raw = event.data;
+      if (raw == null) return;
+
+      // Support several payload shapes
+      let status: string | undefined;
+      let progress = 0;
+      let dur = 0;
+      let qualityLabel: string | undefined;
+
+      if (typeof raw === 'string') {
+        try {
+          const parsed = JSON.parse(raw);
+          status = parsed?.type || parsed?.event || parsed?.player_status;
+          progress = parsed?.currentTime ?? parsed?.player_progress ?? 0;
+          dur = parsed?.duration ?? parsed?.player_duration ?? 0;
+        } catch {
+          if (/ended|complete/i.test(raw)) status = 'ended';
         }
-        setShowNextEpisode(hasNextEpisode);
-      } else if (status) setPlayerStatus(status);
-      setCurrentTime(progress);
-      setDuration(dur);
-      if (d.quality?.label) setQuality(d.quality.label);
-      onProgressUpdate?.(progress, dur);
+      } else if (typeof raw === 'object') {
+        const d = raw.data && typeof raw.data === 'object' ? raw.data : raw;
+        status =
+          raw.type === 'PLAYER_EVENT'
+            ? d.player_status || d.event || d.status
+            : d.player_status || d.event || d.status || raw.event || raw.type;
+        progress = d.player_progress ?? d.currentTime ?? d.time ?? 0;
+        dur = d.player_duration ?? d.duration ?? 0;
+        qualityLabel = d.quality?.label || d.quality;
+      }
+
+      if (!status && progress > 0) {
+        // timeupdate-style without status
+        setCurrentTime(progress);
+        if (dur > 0) setDuration(dur);
+        onProgressUpdate?.(progress, dur);
+        if (dur > 30 && progress >= dur - 1.25) {
+          setPlayerStatus('completed');
+          startNextFlow();
+        }
+        return;
+      }
+
+      if (!status) return;
+
+      const s = String(status).toLowerCase();
+      if (s === 'play' || s === 'playing' || s === 'timeupdate') {
+        if (s !== 'timeupdate') setPlayerStatus('playing');
+        setCurrentTime(progress);
+        if (dur > 0) setDuration(dur);
+        onProgressUpdate?.(progress, dur);
+        // Near-end fallback when player never sends "ended"
+        if (dur > 30 && progress >= dur - 1.25) {
+          setPlayerStatus('completed');
+          startNextFlow();
+        }
+      } else if (s === 'pause' || s === 'paused') {
+        setPlayerStatus('paused');
+      } else if (s === 'ended' || s === 'completed' || s === 'complete' || s === 'finish' || s === 'finished') {
+        setPlayerStatus('completed');
+        startNextFlow();
+      } else {
+        setPlayerStatus(s as PlayerStatus);
+      }
+
+      if (qualityLabel) setQuality(String(qualityLabel));
     };
+
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [hasNextEpisode, settings.autoplayNext, onNextEpisode, onProgressUpdate]);
+  }, [startNextFlow, onProgressUpdate]);
 
   useEffect(() => {
     if (!showSubtitleMenu) return;
@@ -251,32 +344,9 @@ export default function VideoPlayer({
                     <div className="p-3 border-b border-white/[0.06]">
                       <p className="text-xs text-white/50 font-medium">Captions</p>
                       <p className="text-[11px] text-white/35 mt-1 leading-relaxed">
-                        Use the <span className="text-white/70">CC</span> button inside the player for working subtitles. Preference is saved for next time.
+                        Use the <span className="text-white/70">CC</span> button inside the player for working subtitles.
                       </p>
                     </div>
-                    <button
-                      onClick={() => {
-                        setSelectedSubtitle('off');
-                        setShowSubtitleMenu(false);
-                      }}
-                      className="w-full px-4 py-2.5 text-left text-sm text-white/70 hover:bg-white/[0.06]"
-                    >
-                      Off
-                    </button>
-                    {['en', 'es', 'fr', 'de', 'ja', 'ko', 'ar', 'hi'].map((code) => (
-                      <button
-                        key={code}
-                        onClick={() => {
-                          setSelectedSubtitle(code);
-                          setShowSubtitleMenu(false);
-                        }}
-                        className={`w-full px-4 py-2.5 text-left text-sm capitalize ${
-                          selectedSubtitle === code ? 'bg-primary/20 text-primary' : 'text-white/70 hover:bg-white/[0.06]'
-                        }`}
-                      >
-                        {code}
-                      </button>
-                    ))}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -290,17 +360,34 @@ export default function VideoPlayer({
           </div>
         </div>
 
+        {/* Auto next / manual next */}
         <AnimatePresence>
           {showNextEpisode && hasNextEpisode && (
-            <motion.button
-              onClick={() => onNextEpisode?.()}
-              className="absolute bottom-28 right-4 flex items-center gap-2 px-5 py-3 rounded-xl bg-primary/90 text-white shadow-lg z-20"
+            <motion.div
+              className="absolute bottom-24 right-4 z-20 flex flex-col items-end gap-2"
               initial={{ opacity: 0, x: 40 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0 }}
             >
-              Next Episode <ChevronRight size={18} />
-            </motion.button>
+              {nextCountdown !== null && (
+                <div className="px-3 py-1.5 rounded-lg bg-black/70 backdrop-blur text-xs text-white/80 border border-white/10">
+                  Next episode in {nextCountdown}s…{' '}
+                  <button onClick={cancelAutoNext} className="text-primary hover:underline ml-1">
+                    Cancel
+                  </button>
+                </div>
+              )}
+              <button
+                onClick={() => {
+                  setNextCountdown(null);
+                  advancedRef.current = true;
+                  onNextEpisode?.();
+                }}
+                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-primary/90 hover:bg-primary text-white shadow-lg"
+              >
+                Next Episode <ChevronRight size={18} />
+              </button>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
