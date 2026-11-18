@@ -182,20 +182,20 @@ export default function MoviePage() {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={handlePlay}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-primary to-primary-dark text-white font-semibold text-sm shadow-lg shadow-primary/30 hover:scale-105 transition-transform"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-[#e50914] hover:bg-[#f6121d] text-white font-bold text-sm shadow-lg shadow-[#e50914]/25 hover:scale-[1.02] transition-all"
               >
                 <Play size={18} fill="white" /> {playing ? 'Playing' : 'Watch Now'}
               </button>
               <button
                 onClick={toggleWatchlist}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-white/5 border border-white/10 text-white text-sm hover:bg-white/10"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-md bg-white/10 border border-white/15 text-white text-sm font-semibold hover:bg-white/15"
               >
                 {inList ? 'In Watchlist' : 'Add to Watchlist'}
               </button>
               <button
                 type="button"
                 onClick={() => setInfoOpen(true)}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-white/5 border border-white/10 text-white text-sm hover:bg-white/10"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-md bg-white/10 border border-white/15 text-white text-sm font-semibold hover:bg-white/15"
               >
                 <Info size={16} /> More Info
               </button>
@@ -204,7 +204,7 @@ export default function MoviePage() {
                   href={`https://www.imdb.com/title/${movie.imdb_id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-white/5 border border-white/10 text-white text-sm hover:bg-white/10"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-md bg-white/10 border border-white/15 text-white text-sm font-semibold hover:bg-white/15"
                 >
                   IMDb <ExternalLink size={14} />
                 </a>
@@ -216,11 +216,11 @@ export default function MoviePage() {
         {playing && (
           <motion.section
             id="player-section"
-            className="mt-10"
+            className="mt-10 -mx-4 sm:mx-0"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className="rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl shadow-black/40 bg-black">
+            <div className="overflow-hidden bg-black shadow-[0_0_80px_rgba(0,0,0,0.85)] ring-1 ring-white/5 sm:rounded-md">
               <div className="aspect-video w-full">
                 <VideoPlayer
                   src={embedUrl}
@@ -254,7 +254,6 @@ export default function MoviePage() {
         )}
       </div>
 
-      {/* More Info — trailer modal */}
       <AnimatePresence>
         {infoOpen && (
           <>
@@ -266,7 +265,7 @@ export default function MoviePage() {
               onClick={() => setInfoOpen(false)}
             />
             <motion.div
-              className="fixed z-[81] left-1/2 top-1/2 w-[min(96vw,920px)] max-h-[92vh] -translate-x-1/2 -translate-y-1/2 rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-dark-lighter flex flex-col"
+              className="fixed z-[81] left-1/2 top-1/2 w-[min(96vw,920px)] max-h-[92vh] -translate-x-1/2 -translate-y-1/2 rounded-md overflow-hidden border border-white/10 shadow-2xl bg-[#141414] flex flex-col"
               initial={{ opacity: 0, scale: 0.94 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
@@ -298,7 +297,7 @@ export default function MoviePage() {
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
                       {trailerLoading ? (
-                        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                        <div className="w-8 h-8 border-2 border-[#e50914] border-t-transparent rounded-full animate-spin" />
                       ) : (
                         <div className="text-center px-6">
                           <p className="text-white/50 text-sm mb-3">No trailer available for this title</p>
@@ -334,14 +333,14 @@ export default function MoviePage() {
                         setInfoOpen(false);
                         handlePlay();
                       }}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-primary to-primary-dark text-white text-sm font-semibold shadow-lg shadow-primary/25"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-[#e50914] hover:bg-[#f6121d] text-white text-sm font-bold"
                     >
                       <Play size={16} fill="white" strokeWidth={0} /> Watch Now
                     </button>
                     <button
                       type="button"
                       onClick={() => setInfoOpen(false)}
-                      className="px-5 py-2.5 rounded-full bg-white/[0.06] border border-white/10 text-white/80 text-sm font-medium hover:bg-white/10"
+                      className="px-5 py-2.5 rounded-md bg-white/10 border border-white/10 text-white/80 text-sm font-medium hover:bg-white/15"
                     >
                       Close
                     </button>
