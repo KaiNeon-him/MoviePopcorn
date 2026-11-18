@@ -1,8 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Play, Star, Clock, Calendar, ArrowLeft, ExternalLink } from 'lucide-react';
-import { MovieDetails, CastMember, fetchMovieDetails, fetchMovieCredits, getImageUrl, getVidLinkMovieUrl } from '../api/tmdb';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, Star, Clock, Calendar, ArrowLeft, ExternalLink, Info, X } from 'lucide-react';
+import {
+  MovieDetails,
+  CastMember,
+  fetchMovieDetails,
+  fetchMovieCredits,
+  fetchMovieTrailerKey,
+  getImageUrl,
+  getVidLinkMovieUrl,
+} from '../api/tmdb';
 import { useWatchlist } from '../hooks/useWatchlist';
 import { useWatchHistory } from '../hooks/useWatchHistory';
 import VideoPlayer from '../components/VideoPlayer';
@@ -14,6 +22,9 @@ export default function MoviePage() {
   const [cast, setCast] = useState<CastMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [playing, setPlaying] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
+  const [trailerKey, setTrailerKey] = useState<string | null>(null);
+  const [trailerLoading, setTrailerLoading] = useState(false);
   const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
   const { addToHistory } = useWatchHistory();
 
@@ -21,6 +32,8 @@ export default function MoviePage() {
     if (!id) return;
     setLoading(true);
     setPlaying(false);
+    setInfoOpen(false);
+    setTrailerKey(null);
     Promise.all([
       fetchMovieDetails(Number(id)),
       fetchMovieCredits(Number(id)),
@@ -30,6 +43,31 @@ export default function MoviePage() {
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (!movie) return;
+    let cancelled = false;
+    setTrailerLoading(true);
+    fetchMovieTrailerKey(movie.id)
+      .then((key) => {
+        if (!cancelled) setTrailerKey(key);
+      })
+      .finally(() => {
+        if (!cancelled) setTrailerLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [movie?.id]);
+
+  useEffect(() => {
+    if (!infoOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setInfoOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [infoOpen]);
 
   if (loading) {
     return (
@@ -154,6 +192,13 @@ export default function MoviePage() {
               >
                 {inList ? 'In Watchlist' : 'Add to Watchlist'}
               </button>
+              <button
+                type="button"
+                onClick={() => setInfoOpen(true)}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-white/5 border border-white/10 text-white text-sm hover:bg-white/10"
+              >
+                <Info size={16} /> More Info
+              </button>
               {movie.imdb_id && (
                 <a
                   href={`https://www.imdb.com/title/${movie.imdb_id}`}
@@ -168,7 +213,6 @@ export default function MoviePage() {
           </div>
         </div>
 
-        {/* Contained player — not full-bleed cinema mode */}
         {playing && (
           <motion.section
             id="player-section"
@@ -209,6 +253,105 @@ export default function MoviePage() {
           </motion.section>
         )}
       </div>
+
+      {/* More Info — trailer modal */}
+      <AnimatePresence>
+        {infoOpen && (
+          <>
+            <motion.div
+              className="fixed inset-0 z-[80] bg-black/85 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setInfoOpen(false)}
+            />
+            <motion.div
+              className="fixed z-[81] left-1/2 top-1/2 w-[min(96vw,920px)] max-h-[92vh] -translate-x-1/2 -translate-y-1/2 rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-dark-lighter flex flex-col"
+              initial={{ opacity: 0, scale: 0.94 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+              role="dialog"
+              aria-label={`${title} trailer`}
+            >
+              <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
+                <p className="text-sm font-semibold text-white truncate pr-4">{title}</p>
+                <button
+                  onClick={() => setInfoOpen(false)}
+                  className="p-2 rounded-full hover:bg-white/10 text-white/60 hover:text-white"
+                  aria-label="Close"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="overflow-y-auto">
+                <div className="relative w-full aspect-video bg-black">
+                  {trailerKey ? (
+                    <iframe
+                      key={trailerKey}
+                      src={`https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=1&rel=0`}
+                      title={`${title} trailer`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="absolute inset-0 w-full h-full border-0"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      {trailerLoading ? (
+                        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <div className="text-center px-6">
+                          <p className="text-white/50 text-sm mb-3">No trailer available for this title</p>
+                          <img
+                            src={getImageUrl(movie.backdrop_path, 'w780')}
+                            alt=""
+                            className="max-h-48 mx-auto rounded-lg opacity-60 object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="p-5 sm:p-6 space-y-4">
+                  <div className="flex flex-wrap items-center gap-2 text-sm">
+                    <span className="flex items-center gap-1 text-white font-semibold">
+                      <Star size={14} className="text-gold" fill="currentColor" />
+                      {movie.vote_average.toFixed(1)}
+                    </span>
+                    {year && <span className="text-white/50">{year}</span>}
+                    {movie.runtime && <span className="text-white/50">{movie.runtime} min</span>}
+                    {movie.genres?.map((g) => (
+                      <span key={g.id} className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60">
+                        {g.name}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-sm text-white/70 leading-relaxed">{movie.overview}</p>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setInfoOpen(false);
+                        handlePlay();
+                      }}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-primary to-primary-dark text-white text-sm font-semibold shadow-lg shadow-primary/25"
+                    >
+                      <Play size={16} fill="white" strokeWidth={0} /> Watch Now
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setInfoOpen(false)}
+                      className="px-5 py-2.5 rounded-full bg-white/[0.06] border border-white/10 text-white/80 text-sm font-medium hover:bg-white/10"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
