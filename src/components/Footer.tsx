@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Logo from './Logo';
-import { Cookie, Shield, FileText, Copyright } from 'lucide-react';
 import { FileDoc, ShieldCheck, Cookie as PhosphorCookie, Copyright as PhosphorCopyright } from '@phosphor-icons/react';
 
 export default function Footer() {
@@ -14,7 +13,6 @@ export default function Footer() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
           <motion.div
             className="md:col-span-1"
             initial={{ opacity: 0, y: 20 }}
@@ -25,12 +23,11 @@ export default function Footer() {
               <Logo size="md" />
             </div>
             <p className="text-white/40 text-sm leading-relaxed">
-              Your ultimate destination for streaming movies and TV shows. 
-              Powered by VidAPI for seamless video playback.
+              Your ultimate destination for streaming movies and TV shows.
+              Metadata by TMDB · Playback via VidSrc.
             </p>
           </motion.div>
 
-          {/* Navigation */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -59,7 +56,6 @@ export default function Footer() {
             </ul>
           </motion.div>
 
-          {/* Info */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -69,12 +65,11 @@ export default function Footer() {
             <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider" style={{ fontFamily: "'Outfit', sans-serif" }}>Info</h3>
             <ul className="space-y-2.5">
               <li><span className="text-white/40 text-sm">Movie data by TMDB</span></li>
-              <li><span className="text-white/40 text-sm">Video streaming by VidAPI</span></li>
+              <li><span className="text-white/40 text-sm">Video streaming by VidSrc</span></li>
               <li><span className="text-white/40 text-sm">For educational purposes only</span></li>
             </ul>
           </motion.div>
 
-          {/* Legal */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -84,37 +79,25 @@ export default function Footer() {
             <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider" style={{ fontFamily: "'Outfit', sans-serif" }}>Legal</h3>
             <ul className="space-y-2.5">
               <li>
-                <Link
-                  to="/terms"
-                  className="group inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-all duration-300"
-                >
+                <Link to="/terms" className="group inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-all duration-300">
                   <FileDoc size={14} weight="duotone" />
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/privacy"
-                  className="group inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-all duration-300"
-                >
+                <Link to="/privacy" className="group inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-all duration-300">
                   <ShieldCheck size={14} weight="duotone" />
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/cookies"
-                  className="group inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-all duration-300"
-                >
+                <Link to="/cookies" className="group inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-all duration-300">
                   <PhosphorCookie size={14} weight="duotone" />
                   Cookie Policy
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/dmca"
-                  className="group inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-all duration-300"
-                >
+                <Link to="/dmca" className="group inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-all duration-300">
                   <PhosphorCopyright size={14} weight="duotone" />
                   DMCA Policy
                 </Link>
@@ -122,7 +105,6 @@ export default function Footer() {
             </ul>
           </motion.div>
 
-          {/* Powered by */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -132,13 +114,13 @@ export default function Footer() {
             <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider" style={{ fontFamily: "'Outfit', sans-serif" }}>Powered By</h3>
             <div className="space-y-2.5">
               <a
-                href="https://vidapi.ru/"
+                href="https://vidsrc.sh/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group inline-flex items-center gap-2 text-white/40 hover:text-primary text-sm transition-all duration-300"
               >
                 <span className="w-0 group-hover:w-2 h-px bg-primary transition-all duration-300" />
-                VidAPI - Video Streaming
+                VidSrc - Video Streaming
               </a>
               <a
                 href="https://www.themoviedb.org/"
