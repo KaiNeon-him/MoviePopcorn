@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, RefreshCw, RotateCw, Subtitles } from 'lucide-react';
+import { ChevronRight, RefreshCw, RotateCw, Subtitles, Server } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import StillWatchingModal from './StillWatchingModal';
 import { useStillWatching } from '../hooks/useStillWatching';
@@ -24,7 +24,7 @@ interface VideoPlayerProps {
 
 type PlayerStatus = 'playing' | 'paused' | 'completed' | 'seeked' | 'idle';
 
-const NEXT_COUNTDOWN_SEC = 5;
+const NEXT_COUNTDOWN_SEC = 8;
 
 export default function VideoPlayer({
   src,
@@ -56,11 +56,12 @@ export default function VideoPlayer({
   const [showSubtitleMenu, setShowSubtitleMenu] = useState(false);
   const [selectedSubtitle, setSelectedSubtitle] = useState(settings.subtitleLanguage || 'off');
   const [isPortrait, setIsPortrait] = useState(false);
+  const [chromeVisible, setChromeVisible] = useState(true);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const mediaId = tmdbId || imdbId || '';
   const progressKey = `moviepopcorn_progress_${mediaId}_${season ?? 0}_${episode ?? 0}`;
 
-  // Reset advance guard when episode changes
   useEffect(() => {
     advancedRef.current = false;
     setShowNextEpisode(false);
@@ -86,6 +87,19 @@ export default function VideoPlayer({
     return () => window.removeEventListener('resize', checkOrientation);
   }, []);
 
+  const bumpChrome = useCallback(() => {
+    setChromeVisible(true);
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => setChromeVisible(false), 3200);
+  }, []);
+
+  useEffect(() => {
+    bumpChrome();
+    return () => {
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+    };
+  }, [bumpChrome, src]);
+
   const handleRotate = async () => {
     if (!('orientation' in screen)) {
       alert('Screen rotation is not supported on this device');
@@ -105,6 +119,7 @@ export default function VideoPlayer({
     }
 
     const url = new URL(src);
+    // Netflix red/black theme (honored by VidLink; ignored harmlessly by others)
     url.searchParams.set('primaryColor', 'e50914');
     url.searchParams.set('secondaryColor', '141414');
     url.searchParams.set('iconColor', 'ffffff');
@@ -142,7 +157,6 @@ export default function VideoPlayer({
     }
   }, [hasNextEpisode, settings.autoplayNext]);
 
-  // Countdown → auto advance
   useEffect(() => {
     if (nextCountdown === null) return;
     if (nextCountdown <= 0) {
@@ -154,18 +168,13 @@ export default function VideoPlayer({
     return () => clearTimeout(t);
   }, [nextCountdown, onNextEpisode]);
 
-  const cancelAutoNext = () => {
-    setNextCountdown(null);
-    // keep the Next button visible
-  };
+  const cancelAutoNext = () => setNextCountdown(null);
 
-  // Listen for player end events (VidLink / generic iframe players)
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       const raw = event.data;
       if (raw == null) return;
 
-      // Support several payload shapes
       let status: string | undefined;
       let progress = 0;
       let dur = 0;
@@ -192,7 +201,6 @@ export default function VideoPlayer({
       }
 
       if (!status && progress > 0) {
-        // timeupdate-style without status
         setCurrentTime(progress);
         if (dur > 0) setDuration(dur);
         onProgressUpdate?.(progress, dur);
@@ -211,7 +219,6 @@ export default function VideoPlayer({
         setCurrentTime(progress);
         if (dur > 0) setDuration(dur);
         onProgressUpdate?.(progress, dur);
-        // Near-end fallback when player never sends "ended"
         if (dur > 30 && progress >= dur - 1.25) {
           setPlayerStatus('completed');
           startNextFlow();
@@ -257,8 +264,14 @@ export default function VideoPlayer({
     onTimeout: () => setShowStillWatching(true),
   });
 
+  const progressPct = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
+
   return (
-    <div className="relative w-full h-full bg-black overflow-hidden">
+    <div
+      className="relative w-full h-full bg-black overflow-hidden group/player"
+      onMouseMove={bumpChrome}
+      onTouchStart={bumpChrome}
+    >
       <div
         className="relative w-full bg-black"
         style={{ aspectRatio: isPortrait ? 'auto' : '16 / 9', minHeight: isPortrait ? '50vh' : '240px' }}
@@ -273,34 +286,56 @@ export default function VideoPlayer({
           title={title}
         />
 
-        <div className="absolute top-0 left-0 right-0 p-3 sm:p-4 flex items-center justify-between pointer-events-none z-10">
-          <motion.h3
-            className="text-white font-semibold text-sm sm:text-base truncate max-w-[50%] drop-shadow-lg"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            {title}
-          </motion.h3>
+        {/* Netflix-style vignette gradients */}
+        <div
+          className={`pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/80 via-black/35 to-transparent transition-opacity duration-500 z-[5] ${
+            chromeVisible ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+        <div
+          className={`pointer-events-none absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-black via-black/50 to-transparent transition-opacity duration-500 z-[5] ${
+            chromeVisible || showNextEpisode ? 'opacity-100' : 'opacity-40'
+          }`}
+        />
 
-          <div className="flex items-center gap-2 pointer-events-auto">
+        {/* Top chrome */}
+        <div
+          className={`absolute top-0 left-0 right-0 px-3 sm:px-5 pt-3 sm:pt-4 pb-8 flex items-start justify-between z-10 transition-all duration-400 ${
+            chromeVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'
+          }`}
+        >
+          <div className="min-w-0 max-w-[55%]">
+            <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.14em] text-[#e50914]">Now Playing</p>
+            <h3 className="text-white font-semibold text-sm sm:text-lg truncate drop-shadow-lg leading-tight mt-0.5">
+              {title}
+            </h3>
+            {season != null && episode != null && (
+              <p className="text-white/55 text-xs mt-0.5">S{season} · E{episode}</p>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5 sm:gap-2 pointer-events-auto">
             {quality && (
-              <div className="px-2 py-1 rounded bg-black/60 backdrop-blur-sm text-white text-xs font-semibold">{quality}</div>
+              <div className="hidden sm:block px-2 py-1 rounded bg-black/55 border border-white/10 text-white/80 text-[10px] font-bold tracking-wide">
+                {quality}
+              </div>
             )}
 
             {sources.length > 1 && (
               <div className="relative">
                 <button
                   onClick={() => setShowSourceMenu(!showSourceMenu)}
-                  className="px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm text-white text-xs font-semibold hover:bg-black/80 flex items-center gap-1.5"
+                  className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded bg-black/55 border border-white/15 text-white text-xs font-semibold hover:bg-black/75 hover:border-white/25 transition-colors"
                 >
-                  <span>Server {currentSourceIndex + 1}</span>
-                  <ChevronRight size={12} className={showSourceMenu ? 'rotate-90' : ''} />
+                  <Server size={12} className="text-[#e50914]" />
+                  <span className="hidden sm:inline">{sources[currentSourceIndex]?.name || 'Server'}</span>
+                  <span className="sm:hidden">{currentSourceIndex + 1}</span>
                 </button>
                 <AnimatePresence>
                   {showSourceMenu && (
                     <motion.div
-                      className="absolute top-full right-0 mt-2 w-48 bg-dark-lighter/95 backdrop-blur-2xl border border-white/[0.08] rounded-xl shadow-2xl overflow-hidden z-30"
-                      initial={{ opacity: 0, y: -8 }}
+                      className="absolute top-full right-0 mt-2 w-44 rounded-md overflow-hidden bg-[#141414] border border-white/10 shadow-2xl shadow-black/80 z-30"
+                      initial={{ opacity: 0, y: -6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
                     >
@@ -308,11 +343,16 @@ export default function VideoPlayer({
                         <button
                           key={source.name}
                           onClick={() => switchSource(index)}
-                          className={`w-full px-4 py-2.5 text-left text-sm ${
-                            index === currentSourceIndex ? 'bg-primary/20 text-primary font-semibold' : 'text-white/70 hover:bg-white/[0.06]'
+                          className={`w-full px-3.5 py-2.5 text-left text-sm border-b border-white/[0.06] last:border-0 ${
+                            index === currentSourceIndex
+                              ? 'bg-[#e50914]/15 text-white font-semibold'
+                              : 'text-white/70 hover:bg-white/[0.06] hover:text-white'
                           }`}
                         >
                           {source.name}
+                          {index === currentSourceIndex && (
+                            <span className="ml-2 text-[10px] text-[#e50914]">●</span>
+                          )}
                         </button>
                       ))}
                     </motion.div>
@@ -321,14 +361,18 @@ export default function VideoPlayer({
               </div>
             )}
 
-            <button onClick={reloadPlayer} className="p-1.5 rounded-lg bg-black/60 text-white/70 hover:text-white hover:bg-black/80" title="Reload">
+            <button
+              onClick={reloadPlayer}
+              className="p-1.5 rounded bg-black/55 border border-white/10 text-white/70 hover:text-white hover:border-white/25 transition-colors"
+              title="Reload"
+            >
               <RefreshCw size={14} />
             </button>
 
             <div className="relative" data-subtitle-menu>
               <button
                 onClick={() => setShowSubtitleMenu(!showSubtitleMenu)}
-                className="p-1.5 rounded-lg bg-black/60 text-white/70 hover:text-white hover:bg-black/80"
+                className="p-1.5 rounded bg-black/55 border border-white/10 text-white/70 hover:text-white hover:border-white/25 transition-colors"
                 title="Subtitles"
               >
                 <Subtitles size={14} />
@@ -336,15 +380,15 @@ export default function VideoPlayer({
               <AnimatePresence>
                 {showSubtitleMenu && (
                   <motion.div
-                    className="absolute top-full right-0 mt-2 w-56 bg-dark-lighter/95 backdrop-blur-2xl border border-white/[0.08] rounded-xl shadow-2xl overflow-hidden z-30"
-                    initial={{ opacity: 0, y: -8 }}
+                    className="absolute top-full right-0 mt-2 w-56 rounded-md overflow-hidden bg-[#141414] border border-white/10 shadow-2xl z-30"
+                    initial={{ opacity: 0, y: -6 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                   >
-                    <div className="p-3 border-b border-white/[0.06]">
-                      <p className="text-xs text-white/50 font-medium">Captions</p>
+                    <div className="p-3">
+                      <p className="text-xs text-white/50 font-medium">Subtitles</p>
                       <p className="text-[11px] text-white/35 mt-1 leading-relaxed">
-                        Use the <span className="text-white/70">CC</span> button inside the player for working subtitles.
+                        Use the <span className="text-white/80">CC</span> control inside the video player for captions.
                       </p>
                     </div>
                   </motion.div>
@@ -353,40 +397,74 @@ export default function VideoPlayer({
             </div>
 
             {isMobile && (
-              <button onClick={handleRotate} className="p-1.5 rounded-lg bg-black/60 text-white/70 hover:text-white md:hidden" title="Rotate">
+              <button
+                onClick={handleRotate}
+                className="p-1.5 rounded bg-black/55 border border-white/10 text-white/70 hover:text-white md:hidden"
+                title="Rotate"
+              >
                 <RotateCw size={14} />
               </button>
             )}
           </div>
         </div>
 
-        {/* Auto next / manual next */}
+        {/* Fake Netflix scrubber hint when we have progress */}
+        {duration > 0 && (
+          <div
+            className={`absolute left-3 right-3 sm:left-5 sm:right-5 bottom-3 z-[6] transition-opacity duration-400 ${
+              chromeVisible && !showNextEpisode ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <div className="h-[3px] w-full rounded-full bg-white/20 overflow-hidden">
+              <div className="h-full bg-[#e50914] rounded-full transition-[width] duration-500" style={{ width: `${progressPct}%` }} />
+            </div>
+          </div>
+        )}
+
+        {/* Netflix-style next episode card */}
         <AnimatePresence>
           {showNextEpisode && hasNextEpisode && (
             <motion.div
-              className="absolute bottom-24 right-4 z-20 flex flex-col items-end gap-2"
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0 }}
+              className="absolute bottom-6 right-3 sm:right-6 z-20 w-[min(92vw,320px)]"
+              initial={{ opacity: 0, y: 24, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 28 }}
             >
-              {nextCountdown !== null && (
-                <div className="px-3 py-1.5 rounded-lg bg-black/70 backdrop-blur text-xs text-white/80 border border-white/10">
-                  Next episode in {nextCountdown}s…{' '}
-                  <button onClick={cancelAutoNext} className="text-primary hover:underline ml-1">
-                    Cancel
-                  </button>
+              <div className="rounded-md overflow-hidden bg-[#141414] border border-white/10 shadow-2xl shadow-black/80">
+                <div className="px-4 pt-3 pb-2">
+                  <p className="text-[10px] uppercase tracking-widest text-white/45 font-semibold">Up Next</p>
+                  <p className="text-white font-semibold text-sm mt-0.5 line-clamp-1">{title}</p>
+                  {nextCountdown !== null && (
+                    <p className="text-xs text-white/55 mt-1">
+                      Playing in <span className="text-white font-semibold">{nextCountdown}s</span>
+                      {' · '}
+                      <button type="button" onClick={cancelAutoNext} className="text-white/80 hover:text-white underline-offset-2 hover:underline">
+                        Cancel
+                      </button>
+                    </p>
+                  )}
                 </div>
-              )}
-              <button
-                onClick={() => {
-                  setNextCountdown(null);
-                  advancedRef.current = true;
-                  onNextEpisode?.();
-                }}
-                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-primary/90 hover:bg-primary text-white shadow-lg"
-              >
-                Next Episode <ChevronRight size={18} />
-              </button>
+                {nextCountdown !== null && (
+                  <div className="h-1 w-full bg-white/10">
+                    <div
+                      className="h-full bg-[#e50914] transition-all duration-1000 linear"
+                      style={{ width: `${((NEXT_COUNTDOWN_SEC - nextCountdown) / NEXT_COUNTDOWN_SEC) * 100}%` }}
+                    />
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNextCountdown(null);
+                    advancedRef.current = true;
+                    onNextEpisode?.();
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#e50914] hover:bg-[#f6121d] text-white text-sm font-bold tracking-wide transition-colors"
+                >
+                  Next Episode <ChevronRight size={18} strokeWidth={2.5} />
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
